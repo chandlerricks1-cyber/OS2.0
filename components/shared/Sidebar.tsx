@@ -28,10 +28,12 @@ const navItems = [
   },
   {
     href: '/upgrade',
-    label: 'Upgrade',
+    label: 'Book a Call',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M8 1L10.5 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H5.5L8 1Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
+        <rect x="1" y="3" width="14" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+        <path d="M1 6.5h14" stroke="currentColor" strokeWidth="1.25"/>
+        <path d="M4.5 1v4M11.5 1v4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
       </svg>
     ),
   },

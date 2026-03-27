@@ -12,19 +12,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check subscription or admin role
-  const [{ data: subscription }, { data: profile }] = await Promise.all([
-    supabase.from('subscriptions').select('status').eq('user_id', user.id).single(),
-    supabase.from('profiles').select('role').eq('id', user.id).single(),
-  ])
-
-  const isAdmin = profile?.role === 'admin'
-  const isActive = subscription?.status === 'active'
-
-  if (!isAdmin && !isActive) {
-    return NextResponse.json({ error: 'Subscription required' }, { status: 403 })
-  }
-
   const refresh = req.nextUrl.searchParams.get('refresh') === 'true'
 
   // Return cached report if exists (unless refresh requested)

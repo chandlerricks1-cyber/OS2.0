@@ -9,15 +9,6 @@ export default async function ReportPage() {
 
   if (!user) redirect('/login')
 
-  const [{ data: subscription }, { data: profile }] = await Promise.all([
-    supabase.from('subscriptions').select('status').eq('user_id', user.id).single(),
-    supabase.from('profiles').select('role').eq('id', user.id).single(),
-  ])
-
-  if (profile?.role !== 'admin' && (!subscription || subscription.status !== 'active')) {
-    redirect('/upgrade')
-  }
-
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -31,6 +22,19 @@ export default async function ReportPage() {
       </div>
 
       <ReportViewer userId={user.id} />
+
+      <div className="bg-gray-900 rounded-2xl p-6 text-center">
+        <p className="font-medium text-white mb-1">Want help executing this plan?</p>
+        <p className="text-gray-400 text-sm mb-5">Book a call to review your report and build your implementation roadmap together.</p>
+        <a
+          href="https://calendly.com/YOUR_LINK_HERE"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-white text-gray-900 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors"
+        >
+          Book a Strategy Call
+        </a>
+      </div>
     </div>
   )
 }

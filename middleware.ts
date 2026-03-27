@@ -57,25 +57,8 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Dashboard routes require active subscription (admins bypass)
+  // Dashboard routes — accessible to all authenticated users
   if (pathname.startsWith('/dashboard')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role === 'admin') return supabaseResponse
-
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('status')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!subscription || subscription.status !== 'active') {
-      return NextResponse.redirect(new URL('/upgrade', request.url))
-    }
     return supabaseResponse
   }
 

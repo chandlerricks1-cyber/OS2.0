@@ -21,7 +21,7 @@ export default function IntakePage() {
   } = useChat({
     sessionId: null,
     onComplete: () => {
-      setTimeout(() => router.push('/upgrade'), 2000)
+      setTimeout(() => router.push('/dashboard'), 2000)
     },
   })
 

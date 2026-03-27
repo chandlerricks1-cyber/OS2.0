@@ -14,11 +14,11 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login')
 
-  const [{ data: metrics }, { data: subscription }, { data: profile }] = await Promise.all([
-    supabase.from('business_metrics').select('*').eq('user_id', user.id).single(),
-    supabase.from('subscriptions').select('status').eq('user_id', user.id).single(),
-    supabase.from('profiles').select('role').eq('id', user.id).single(),
-  ])
+  const { data: metrics } = await supabase
+    .from('business_metrics')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
 
   if (!metrics) {
     return (
@@ -31,8 +31,6 @@ export default async function DashboardPage() {
       </div>
     )
   }
-
-  const isActive = subscription?.status === 'active' || profile?.role === 'admin'
 
   const offers = metrics.primary_offers as PrimaryOffer[] | null
   const blockers = metrics.cro_blockers as CROBlocker[] | null
@@ -224,20 +222,20 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {!isActive && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-center justify-between">
-          <div>
-            <p className="font-medium text-amber-900 text-sm">Unlock your full AI report</p>
-            <p className="text-amber-700 text-sm mt-0.5">Subscribe to get your personalized 90-day action plan.</p>
-          </div>
-          <Link
-            href="/upgrade"
-            className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors flex-shrink-0"
-          >
-            Upgrade
-          </Link>
+      <div className="bg-gray-900 rounded-2xl p-5 flex items-center justify-between">
+        <div>
+          <p className="font-medium text-white text-sm">Want help executing this plan?</p>
+          <p className="text-gray-400 text-sm mt-0.5">Book a strategy call to review your numbers and build your roadmap together.</p>
         </div>
-      )}
+        <a
+          href="https://calendly.com/YOUR_LINK_HERE"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex-shrink-0"
+        >
+          Book a Strategy Call
+        </a>
+      </div>
     </div>
   )
 }
