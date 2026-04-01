@@ -383,7 +383,7 @@ export default function LandingPage() {
       <footer className="bg-page-dark border-t border-white/10 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Logo height={30} />
+            <Logo height={30} variant="light" />
             <div className="flex items-center gap-8">
               <a href="#how-it-works" className="text-sm text-gray-400 hover:text-white transition-colors">
                 How It Works
