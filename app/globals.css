@@ -54,6 +54,38 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Gradient CTA button */
+.btn-gradient {
+  background: linear-gradient(73deg, #ffb303 0%, #ff9a02 61.4%, #ff8800 100%);
+  color: white;
+  font-weight: 700;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(255, 136, 0, 0.25), 0px 8px 24px rgba(255, 136, 0, 0.15);
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+.btn-gradient:hover {
+  box-shadow: 0px 2px 12px rgba(255, 136, 0, 0.35), 0px 12px 32px rgba(255, 136, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Scroll reveal */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }

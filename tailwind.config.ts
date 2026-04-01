@@ -16,6 +16,9 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         brand: {
           dark: '#2B1A0E',
@@ -27,7 +30,12 @@ const config: Config = {
           'amber-light': '#FDE07A',
           cream: '#FDF8F3',
           'cream-100': '#F5EDE0',
+          'gradient-start': '#ffb303',
+          'gradient-mid': '#ff9a02',
+          'gradient-end': '#ff8800',
         },
+        'page-dark': '#171717',
+        'page-muted': '#6b7280',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -66,6 +74,11 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'elevated': '0px 2px 8px rgba(0,0,0,0.08), 0px 16px 48px rgba(0,0,0,0.1)',
+        'nav': '0px 2px 12px rgba(0,0,0,0.06), 0px 8px 32px rgba(0,0,0,0.08)',
+        'card-soft': '0px 2px 6px rgba(0,0,0,0.04), 0px 8px 24px rgba(0,0,0,0.06)',
       },
       keyframes: {
         "accordion-down": {
