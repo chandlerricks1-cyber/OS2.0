@@ -117,7 +117,7 @@ export default function LandingPage() {
       {/* ── Floating Nav ─────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
         <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-nav px-6 py-3 flex items-center justify-between">
-          <Logo height={36} />
+          <Logo height={54} />
           <div className="hidden md:flex items-center gap-8">
             <a href="#how-it-works" className="text-sm text-page-muted hover:text-page-dark transition-colors">
               How It Works
@@ -383,7 +383,7 @@ export default function LandingPage() {
       <footer className="bg-page-dark border-t border-white/10 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Logo height={30} variant="light" />
+            <Logo height={45} variant="light" />
             <div className="flex items-center gap-8">
               <a href="#how-it-works" className="text-sm text-gray-400 hover:text-white transition-colors">
                 How It Works

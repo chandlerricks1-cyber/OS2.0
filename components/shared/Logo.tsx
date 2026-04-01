@@ -4,7 +4,7 @@ interface LogoProps {
   className?: string
 }
 
-export function Logo({ height = 40, variant = 'dark', className = '' }: LogoProps) {
+export function Logo({ height = 60, variant = 'dark', className = '' }: LogoProps) {
   const src = variant === 'light' ? '/logo-light.png' : '/logo-dark.png'
   return (
     <img

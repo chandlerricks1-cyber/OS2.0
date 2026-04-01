@@ -45,7 +45,7 @@ export function Sidebar() {
   return (
     <aside className="w-56 bg-brand-dark flex flex-col">
       <div className="px-4 py-5 border-b border-white/10">
-        <Logo height={32} variant="light" />
+        <Logo height={48} variant="light" />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">
