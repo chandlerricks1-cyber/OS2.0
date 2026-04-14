@@ -19,7 +19,7 @@ export default function PodcastThankYouPage() {
       {/* Header */}
       <div className={`border-b px-6 py-4 ${headerBorder}`}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Logo height={45} variant={isDark ? 'light' : 'dark'} />
+          <Logo height={56} variant={isDark ? 'light' : 'dark'} />
           <button
             onClick={toggle}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-900'}`}

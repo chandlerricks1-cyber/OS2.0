@@ -117,7 +117,7 @@ export default function LandingPage() {
       {/* ── Floating Nav ─────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
         <div className="max-w-6xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-nav px-6 py-3 flex items-center justify-between">
-          <Logo height={54} />
+          <Logo height={68} />
           <div className="hidden md:flex items-center gap-8">
             <a href="#how-it-works" className="text-sm text-page-muted hover:text-page-dark transition-colors">
               How It Works
@@ -155,10 +155,23 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-[56px] font-black text-page-dark leading-[1.08] tracking-tight mb-6">
-            Stop bleeding cash on customer
-            <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
-              acquisition that doesn&apos;t pay back
+            <span className="block">
+              Lower your{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
+                Cost to acquire a customer
+              </span>
+            </span>
+            <span className="block mt-2">
+              Increase{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
+                Customer Lifetime Value
+              </span>
+            </span>
+            <span className="block mt-2">
+              And get permission to{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
+                Scale
+              </span>
             </span>
           </h1>
 
@@ -202,7 +215,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats ────────────────────────────────────── */}
-      <section className="bg-gray-50 py-20 px-6">
+      <section className="bg-gray-50 py-16 md:py-20 px-6">
         <div className="max-w-4xl mx-auto scroll-reveal">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {stats.map((stat) => (
@@ -219,7 +232,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How It Works ─────────────────────────────── */}
-      <section id="how-it-works" className="bg-white py-24 px-6">
+      <section id="how-it-works" className="bg-white py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 scroll-reveal">
             <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4">
@@ -249,7 +262,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ─────────────────────────────────── */}
-      <section id="features" className="bg-gray-50 py-24 px-6">
+      <section id="features" className="bg-gray-50 py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black text-page-dark text-center mb-16 tracking-tight scroll-reveal">
             Everything you need to understand<br className="hidden sm:block" /> your unit economics
@@ -276,7 +289,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Social Proof ─────────────────────────────── */}
-      <section className="bg-white py-24 px-6">
+      <section className="bg-white py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black text-page-dark text-center mb-16 tracking-tight scroll-reveal">
             Trusted by growth-focused founders
@@ -313,7 +326,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ──────────────────────────────────────── */}
-      <section id="faq" className="bg-gray-50 py-24 px-6">
+      <section id="faq" className="bg-gray-50 py-20 md:py-24 px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black text-page-dark text-center mb-16 tracking-tight scroll-reveal">
             Frequently asked questions
@@ -355,7 +368,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ────────────────────────────────── */}
-      <section className="bg-page-dark py-24 px-6">
+      <section className="bg-page-dark py-20 md:py-24 px-6">
         <div className="max-w-3xl mx-auto text-center scroll-reveal">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
             Ready to fix your<br />
@@ -383,7 +396,7 @@ export default function LandingPage() {
       <footer className="bg-page-dark border-t border-white/10 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Logo height={45} variant="light" />
+            <Logo height={56} variant="light" />
             <div className="flex items-center gap-8">
               <a href="#how-it-works" className="text-sm text-gray-400 hover:text-white transition-colors">
                 How It Works

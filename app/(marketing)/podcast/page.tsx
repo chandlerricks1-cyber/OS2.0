@@ -23,7 +23,7 @@ const benefits = [
     icon: ShieldCheck,
     title: 'Zero Pressure, All Value',
     description:
-      'This isn\'t a sales call. It\'s a real conversation about your business where you walk away with actionable insights.',
+      'This is a real conversation about your business where you walk away with actionable insights.',
   },
 ]
 
@@ -151,7 +151,7 @@ export default function PodcastPage() {
       {/* ── Floating Nav ─────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
         <div className={`max-w-6xl mx-auto backdrop-blur-md rounded-2xl shadow-nav border px-6 py-3 flex items-center justify-between ${navBg}`}>
-          <Logo height={54} variant={isDark ? 'light' : 'dark'} />
+          <Logo height={68} variant={isDark ? 'light' : 'dark'} />
           <div className="hidden md:flex items-center gap-8">
             <a href="#benefits" className={`text-sm transition-colors ${navLink}`}>Benefits</a>
             <a href="#how-it-works" className={`text-sm transition-colors ${navLink}`}>How It Works</a>
@@ -178,7 +178,7 @@ export default function PodcastPage() {
           </div>
 
           <h1 className={`text-4xl sm:text-5xl md:text-[56px] font-black leading-[1.08] tracking-tight mb-6 ${heading}`}>
-            Solve your biggest growth constraint on
+            Solve your biggest growth constraint on{' '}
             <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
               The Crucible Podcast
@@ -201,7 +201,7 @@ export default function PodcastPage() {
       </section>
 
       {/* ── Benefits ─────────────────────────────────── */}
-      <section id="benefits" className="py-24 px-6">
+      <section id="benefits" className="py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 scroll-reveal">
             <h2 className={`text-3xl md:text-4xl font-black tracking-tight mb-4 ${heading}`}>
@@ -231,7 +231,7 @@ export default function PodcastPage() {
       </section>
 
       {/* ── How It Works ─────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6">
+      <section id="how-it-works" className="py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 scroll-reveal">
             <h2 className={`text-3xl md:text-4xl font-black tracking-tight mb-4 ${heading}`}>
@@ -274,7 +274,7 @@ export default function PodcastPage() {
       </section>
 
       {/* ── Meet Your Host ───────────────────────────── */}
-      <section id="host" className="py-24 px-6">
+      <section id="host" className="py-20 md:py-24 px-6">
         <div className="max-w-5xl mx-auto scroll-reveal">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-gradient-start/10 to-brand-gradient-end/10 border border-brand-gradient-end/20 text-brand-gradient-end text-xs font-semibold px-4 py-2 rounded-full mb-6 tracking-wide uppercase">
@@ -334,7 +334,7 @@ export default function PodcastPage() {
       </section>
 
       {/* ── Lead Capture Form ────────────────────────── */}
-      <section id="book" className="py-24 px-6">
+      <section id="book" className="py-20 md:py-24 px-6">
         <div className="max-w-2xl mx-auto scroll-reveal">
           <div className="text-center mb-12">
             <h2 className={`text-3xl md:text-4xl font-black tracking-tight mb-4 ${heading}`}>
@@ -433,7 +433,7 @@ export default function PodcastPage() {
       <footer className={`border-t py-12 px-6 ${footerBorder}`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Logo height={45} variant={isDark ? 'light' : 'dark'} />
+            <Logo height={56} variant={isDark ? 'light' : 'dark'} />
             <div className="flex items-center gap-8">
               <a href="#benefits" className={`text-sm transition-colors ${navLink}`}>Benefits</a>
               <a href="#how-it-works" className={`text-sm transition-colors ${navLink}`}>How It Works</a>
