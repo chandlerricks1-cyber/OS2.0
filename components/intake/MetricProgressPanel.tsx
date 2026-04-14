@@ -10,6 +10,7 @@ import {
 
 interface MetricProgressPanelProps {
   partialMetrics: Partial<ExtractedMetrics>
+  isDark?: boolean
 }
 
 interface MetricCardConfig {
@@ -84,102 +85,133 @@ const METRIC_CARDS: MetricCardConfig[] = [
   },
 ]
 
-function MetricCard({ config, metrics }: { config: MetricCardConfig; metrics: Partial<ExtractedMetrics> }) {
+function MetricCard({
+  config,
+  metrics,
+  isDark,
+}: {
+  config: MetricCardConfig
+  metrics: Partial<ExtractedMetrics>
+  isDark: boolean
+}) {
   const discovered = config.isDiscovered(metrics)
   const value = config.getValue(metrics)
 
+  const discoveredCls = isDark
+    ? 'bg-[#1a1208] border border-brand-orange/40 shadow-[0_0_12px_rgba(255,136,0,0.1)]'
+    : 'bg-gradient-to-br from-brand-cream to-brand-cream-100 border border-brand-orange/40 shadow-[0_2px_8px_rgba(255,136,0,0.12)]'
+  const dormantCls = isDark
+    ? 'bg-[#141414] border border-dashed border-white/10'
+    : 'bg-gray-50 border border-dashed border-gray-200'
+
+  const labelCls = discovered
+    ? isDark ? 'text-brand-orange/80' : 'text-brand-orange-dark'
+    : isDark ? 'text-white/30' : 'text-gray-400'
+  const valueCls = discovered
+    ? isDark ? 'text-white' : 'text-gray-900'
+    : isDark ? 'text-white/15' : 'text-gray-300'
+  const descCls = discovered
+    ? isDark ? 'text-white/40' : 'text-gray-500'
+    : isDark ? 'text-white/20' : 'text-gray-300'
+
   return (
-    <div
-      className={`
-        rounded-xl p-4 transition-all duration-500
-        ${discovered
-          ? 'bg-[#1a1208] border border-brand-orange/40 shadow-[0_0_12px_rgba(232,101,48,0.08)]'
-          : 'bg-[#141414] border border-dashed border-white/10'
-        }
-      `}
-    >
-      <div className={`text-xs font-medium mb-1 transition-colors duration-300 ${discovered ? 'text-brand-orange/70' : 'text-white/30'}`}>
+    <div className={`rounded-xl p-4 transition-all duration-500 ${discovered ? discoveredCls : dormantCls}`}>
+      <div className={`text-xs font-medium mb-1 transition-colors duration-300 ${labelCls}`}>
         {config.label}
       </div>
-      <div className={`text-xl font-bold tracking-tight transition-all duration-300 ${discovered ? 'text-white' : 'text-white/15'}`}>
+      <div className={`text-xl font-bold tracking-tight transition-all duration-300 ${valueCls}`}>
         {value}
       </div>
-      <div className={`text-[10px] mt-1 transition-colors duration-300 ${discovered ? 'text-white/40' : 'text-white/20'}`}>
+      <div className={`text-[10px] mt-1 transition-colors duration-300 ${descCls}`}>
         {config.description}
       </div>
     </div>
   )
 }
 
-function OfferPill({ offer }: { offer: PrimaryOffer }) {
+function OfferPill({ offer, isDark }: { offer: PrimaryOffer; isDark: boolean }) {
   const priceLabel = offer.price != null
     ? formatCurrency(offer.price) + (offer.price_type === 'monthly' ? '/mo' : offer.price_type === 'annual' ? '/yr' : '')
     : null
 
+  const container = isDark
+    ? 'bg-[#1a1208] border-brand-orange/30'
+    : 'bg-brand-cream border-brand-orange/30'
+  const name = isDark ? 'text-white' : 'text-gray-900'
+  const price = isDark ? 'text-brand-orange/80' : 'text-brand-orange-dark'
+  const desc = isDark ? 'text-white/40' : 'text-gray-500'
+
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-[#1a1208] border border-brand-orange/30 px-4 py-3">
+    <div className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${container}`}>
       <div className="min-w-0">
-        <div className="text-sm font-medium text-white truncate">{offer.name}</div>
-        {priceLabel && (
-          <div className="text-xs text-brand-orange/70 mt-0.5">{priceLabel}</div>
-        )}
+        <div className={`text-sm font-medium truncate ${name}`}>{offer.name}</div>
+        {priceLabel && <div className={`text-xs mt-0.5 ${price}`}>{priceLabel}</div>}
         {offer.description && (
-          <div className="text-[11px] text-white/40 mt-1 line-clamp-2">{offer.description}</div>
+          <div className={`text-[11px] mt-1 line-clamp-2 ${desc}`}>{offer.description}</div>
         )}
       </div>
     </div>
   )
 }
 
-export function MetricProgressPanel({ partialMetrics }: MetricProgressPanelProps) {
+export function MetricProgressPanel({ partialMetrics, isDark = true }: MetricProgressPanelProps) {
   const discoveredCount = METRIC_CARDS.filter((c) => c.isDiscovered(partialMetrics)).length
   const offers = partialMetrics.primary_offers ?? []
 
+  const headerBorder = isDark ? 'border-white/[0.06]' : 'border-gray-200'
+  const headerText = isDark ? 'text-white/80' : 'text-gray-900'
+  const trackBg = isDark ? 'bg-white/10' : 'bg-gray-200'
+  const countText = isDark ? 'text-white/30' : 'text-gray-500'
+  const sectionLabel = isDark ? 'text-white/40' : 'text-gray-500'
+  const emptyCls = isDark
+    ? 'rounded-xl border border-dashed border-white/10 bg-[#141414] text-white/20'
+    : 'rounded-xl border border-dashed border-gray-200 bg-gray-50 text-gray-400'
+  const badgeCls = isDark
+    ? 'bg-brand-orange/20 text-brand-orange'
+    : 'bg-brand-cream-100 text-brand-orange-dark'
+
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-5 pt-5 pb-4 border-b border-white/[0.06]">
-        <h2 className="text-sm font-semibold text-white/80">Your Business Profile</h2>
+      <div className={`px-5 pt-5 pb-4 border-b ${headerBorder}`}>
+        <h2 className={`text-sm font-bold ${headerText}`}>Your Business Profile</h2>
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
+          <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${trackBg}`}>
             <div
-              className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-amber transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end transition-all duration-700"
               style={{ width: `${Math.round((discoveredCount / METRIC_CARDS.length) * 100)}%` }}
             />
           </div>
-          <span className="text-[11px] text-white/30 tabular-nums shrink-0">
+          <span className={`text-[11px] tabular-nums shrink-0 ${countText}`}>
             {discoveredCount}/{METRIC_CARDS.length}
           </span>
         </div>
       </div>
 
-      {/* Metric Cards Grid */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
         <div className="grid grid-cols-2 gap-3">
           {METRIC_CARDS.map((config) => (
-            <MetricCard key={config.label} config={config} metrics={partialMetrics} />
+            <MetricCard key={config.label} config={config} metrics={partialMetrics} isDark={isDark} />
           ))}
         </div>
 
-        {/* Primary Offers */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Primary Offers</h3>
+            <h3 className={`text-xs font-semibold uppercase tracking-wider ${sectionLabel}`}>Primary Offers</h3>
             {offers.length > 0 && (
-              <span className="text-[10px] bg-brand-orange/20 text-brand-orange rounded-full px-2 py-0.5">
+              <span className={`text-[10px] rounded-full px-2 py-0.5 ${badgeCls}`}>
                 {offers.length}
               </span>
             )}
           </div>
 
           {offers.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 bg-[#141414] px-4 py-5 text-center">
-              <div className="text-[11px] text-white/20">Offers will appear here as they&apos;re identified</div>
+            <div className={`px-4 py-5 text-center ${emptyCls}`}>
+              <div className="text-[11px]">Offers will appear here as they&apos;re identified</div>
             </div>
           ) : (
             <div className="space-y-2">
               {offers.map((offer, i) => (
-                <OfferPill key={i} offer={offer} />
+                <OfferPill key={i} offer={offer} isDark={isDark} />
               ))}
             </div>
           )}

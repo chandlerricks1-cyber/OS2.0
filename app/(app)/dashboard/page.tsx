@@ -7,6 +7,8 @@ import { MetricsEditor } from '@/components/dashboard/MetricsEditor'
 import { formatCurrency, formatMonths, formatPercent, formatNumber } from '@/lib/utils/metrics'
 import type { PrimaryOffer, CROBlocker } from '@/types/intake'
 import Link from 'next/link'
+import { Package, AlertTriangle } from 'lucide-react'
+import { BookCallButton } from '@/components/dashboard/BookCallButton'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,7 +27,7 @@ export default async function DashboardPage() {
       <div className="max-w-2xl mx-auto text-center py-16">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">No data yet</h2>
         <p className="text-gray-500 mb-6">Complete the intake analysis to see your metrics.</p>
-        <Link href="/intake" className="bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800">
+        <Link href="/intake" className="btn-gradient px-6 py-2.5 inline-block">
           Start Intake
         </Link>
       </div>
@@ -39,9 +41,9 @@ export default async function DashboardPage() {
     <div className="max-w-5xl mx-auto space-y-6">
 
       {/* Identity Header */}
-      <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 flex items-center justify-between gap-4">
+      <div className="bg-white border border-gray-200 rounded-[25px] px-6 py-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
             {metrics.company_name ? metrics.company_name[0].toUpperCase() : '?'}
           </div>
           <div className="min-w-0">
@@ -78,7 +80,7 @@ export default async function DashboardPage() {
             <MetricsEditor metrics={metrics} />
             <Link
               href="/dashboard/report"
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              className="btn-gradient px-4 py-2 inline-block text-sm"
             >
               View Full Report →
             </Link>
@@ -162,8 +164,13 @@ export default async function DashboardPage() {
 
       {/* Primary Offers */}
       {offers && offers.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Your Primary Offers</h2>
+        <div className="bg-white border border-gray-200 rounded-[25px] p-8">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center flex-shrink-0">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">Your Primary Offers</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {offers.map((offer, i) => (
               <div key={i} className="border border-gray-100 rounded-xl p-4 bg-gray-50">
@@ -187,13 +194,18 @@ export default async function DashboardPage() {
 
       {/* CRO Blockers */}
       {blockers && blockers.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Your Top CRO Blockers</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Ranked by estimated revenue impact</p>
+        <div className="bg-white border border-gray-200 rounded-[25px] p-8">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Your Top CRO Blockers</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Ranked by estimated revenue impact</p>
+              </div>
             </div>
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-medium text-brand-orange-dark bg-brand-cream-100 px-2.5 py-1 rounded-full">
               {blockers.length} identified
             </span>
           </div>
@@ -202,14 +214,14 @@ export default async function DashboardPage() {
               .sort((a, b) => a.rank - b.rank)
               .map((blocker, i) => (
                 <li key={i} className="flex gap-4 items-start">
-                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center mt-0.5">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end text-white text-xs font-bold flex items-center justify-center mt-0.5">
                     {blocker.rank}
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-gray-900 text-sm">{blocker.title}</p>
                       {blocker.cro_lever && (
-                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full capitalize">
+                        <span className="text-xs font-medium text-brand-orange-dark bg-brand-cream-100 px-2 py-0.5 rounded-full capitalize">
                           {blocker.cro_lever}
                         </span>
                       )}
@@ -222,19 +234,12 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="bg-gray-900 rounded-2xl p-5 flex items-center justify-between">
+      <div className="bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end rounded-[25px] p-6 flex items-center justify-between shadow-[0_8px_24px_rgba(255,136,0,0.2)]">
         <div>
-          <p className="font-medium text-white text-sm">Want help executing this plan?</p>
-          <p className="text-gray-400 text-sm mt-0.5">Book a strategy call to review your numbers and build your roadmap together.</p>
+          <p className="font-bold text-white text-base">Want help executing this plan?</p>
+          <p className="text-white/85 text-sm mt-0.5">Book a strategy call to review your numbers and build your roadmap together.</p>
         </div>
-        <a
-          href="https://calendly.com/YOUR_LINK_HERE"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex-shrink-0"
-        >
-          Book a Strategy Call
-        </a>
+        <BookCallButton />
       </div>
     </div>
   )

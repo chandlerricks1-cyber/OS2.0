@@ -1,7 +1,27 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { ChatMessage, ExtractedMetrics } from '@/types/intake'
+
+interface PersistedChatState {
+  messages: ChatMessage[]
+  sessionId: string | null
+  partialMetrics: Partial<ExtractedMetrics>
+  isComplete: boolean
+}
+
+function loadPersisted(key: string | undefined): PersistedChatState | null {
+  if (!key || typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as PersistedChatState
+    if (!Array.isArray(parsed.messages)) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
 
 const SENTINEL_COMPLETE = '[CRUCIBLE_COMPLETE]'
 const SENTINEL_ERROR_PREFIX = '[CRUCIBLE_ERROR:'
@@ -66,16 +86,52 @@ function parseIntakeCompletionLocal(text: string): Partial<ExtractedMetrics> | n
 interface UseChatOptions {
   sessionId: string | null
   onComplete?: () => void
+  storageKey?: string
 }
 
-export function useChat({ sessionId: initialSessionId, onComplete }: UseChatOptions) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+export function useChat({ sessionId: initialSessionId, onComplete, storageKey }: UseChatOptions) {
+  const persisted = loadPersisted(storageKey)
+  const [messages, setMessages] = useState<ChatMessage[]>(persisted?.messages ?? [])
   const [isStreaming, setIsStreaming] = useState(false)
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(initialSessionId)
-  const [isComplete, setIsComplete] = useState(false)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(
+    persisted?.sessionId ?? initialSessionId
+  )
+  const [isComplete, setIsComplete] = useState<boolean>(persisted?.isComplete ?? false)
   const [error, setError] = useState<string | null>(null)
-  const [partialMetrics, setPartialMetrics] = useState<Partial<ExtractedMetrics>>({})
+  const [partialMetrics, setPartialMetrics] = useState<Partial<ExtractedMetrics>>(
+    persisted?.partialMetrics ?? {}
+  )
   const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    if (!storageKey || typeof window === 'undefined') return
+    if (messages.length === 0 && !currentSessionId && Object.keys(partialMetrics).length === 0) {
+      return
+    }
+    try {
+      const payload: PersistedChatState = {
+        messages,
+        sessionId: currentSessionId,
+        partialMetrics,
+        isComplete,
+      }
+      window.localStorage.setItem(storageKey, JSON.stringify(payload))
+    } catch {
+      // Ignore quota / serialization errors
+    }
+  }, [storageKey, messages, currentSessionId, partialMetrics, isComplete])
+
+  const resetChat = useCallback(() => {
+    abortRef.current?.abort()
+    setMessages([])
+    setCurrentSessionId(initialSessionId)
+    setIsComplete(false)
+    setPartialMetrics({})
+    setError(null)
+    if (storageKey && typeof window !== 'undefined') {
+      window.localStorage.removeItem(storageKey)
+    }
+  }, [initialSessionId, storageKey])
 
   const sendMessage = useCallback(async (content: string) => {
     if (isStreaming || isComplete) return
@@ -264,5 +320,6 @@ export function useChat({ sessionId: initialSessionId, onComplete }: UseChatOpti
     sendMessage,
     startIntake,
     retryLastMessage,
+    resetChat,
   }
 }

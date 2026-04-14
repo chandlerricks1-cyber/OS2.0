@@ -230,6 +230,144 @@ export interface Database {
           created_at?: string
         }
       }
+      podcast_leads: {
+        Row: {
+          id: string
+          full_name: string
+          email: string
+          phone: string
+          preferred_date: string
+          status: 'new' | 'intake_complete' | 'scheduled' | 'recorded' | 'archived'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          email: string
+          phone: string
+          preferred_date: string
+          status?: 'new' | 'intake_complete' | 'scheduled' | 'recorded' | 'archived'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          email?: string
+          phone?: string
+          preferred_date?: string
+          status?: 'new' | 'intake_complete' | 'scheduled' | 'recorded' | 'archived'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      podcast_intake: {
+        Row: {
+          id: string
+          lead_id: string
+          business_name: string | null
+          business_type: string | null
+          industry: string | null
+          years_in_business: string | null
+          business_description: string | null
+          monthly_revenue: string | null
+          revenue_model: string | null
+          average_transaction_value: string | null
+          customer_count: string | null
+          pricing_structure: string | null
+          primary_acquisition_channels: string | null
+          monthly_ad_spend: string | null
+          estimated_cac: string | null
+          close_rate: string | null
+          sales_process: string | null
+          primary_offer: string | null
+          secondary_offers: string | null
+          differentiator: string | null
+          biggest_constraint: string | null
+          tried_and_failed: string | null
+          goal_next_90_days: string | null
+          anything_else: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          business_name?: string | null
+          business_type?: string | null
+          industry?: string | null
+          years_in_business?: string | null
+          business_description?: string | null
+          monthly_revenue?: string | null
+          revenue_model?: string | null
+          average_transaction_value?: string | null
+          customer_count?: string | null
+          pricing_structure?: string | null
+          primary_acquisition_channels?: string | null
+          monthly_ad_spend?: string | null
+          estimated_cac?: string | null
+          close_rate?: string | null
+          sales_process?: string | null
+          primary_offer?: string | null
+          secondary_offers?: string | null
+          differentiator?: string | null
+          biggest_constraint?: string | null
+          tried_and_failed?: string | null
+          goal_next_90_days?: string | null
+          anything_else?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          business_name?: string | null
+          business_type?: string | null
+          industry?: string | null
+          years_in_business?: string | null
+          business_description?: string | null
+          monthly_revenue?: string | null
+          revenue_model?: string | null
+          average_transaction_value?: string | null
+          customer_count?: string | null
+          pricing_structure?: string | null
+          primary_acquisition_channels?: string | null
+          monthly_ad_spend?: string | null
+          estimated_cac?: string | null
+          close_rate?: string | null
+          sales_process?: string | null
+          primary_offer?: string | null
+          secondary_offers?: string | null
+          differentiator?: string | null
+          biggest_constraint?: string | null
+          tried_and_failed?: string | null
+          goal_next_90_days?: string | null
+          anything_else?: string | null
+          created_at?: string
+        }
+      }
+      podcast_lead_tags: {
+        Row: {
+          id: string
+          lead_id: string
+          tag: string
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          tag: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          tag?: string
+          created_by?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,33 +1,130 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { ClientTable } from '@/components/admin/ClientTable'
+import Link from 'next/link'
 
-export default async function AdminPage() {
+const statusColors: Record<string, string> = {
+  new: 'bg-blue-100 text-blue-700',
+  intake_complete: 'bg-green-100 text-green-700',
+  scheduled: 'bg-purple-100 text-purple-700',
+  recorded: 'bg-amber-100 text-amber-700',
+  archived: 'bg-gray-100 text-gray-500',
+}
+
+export default async function AdminDashboardPage() {
   const supabase = await createAdminClient()
 
-  const { data: clients } = await supabase
-    .from('profiles')
-    .select(`
-      id,
-      email,
-      full_name,
-      created_at,
-      intake_sessions(status, completed_at),
-      subscriptions(status, plan_type),
-      business_metrics(cac, ltv, cac_payback_months),
-      client_tags(tag)
-    `)
-    .eq('role', 'client')
+  // Fetch all podcast leads with intake status
+  const { data: leads } = await supabase
+    .from('podcast_leads')
+    .select('*, podcast_intake(id)')
     .order('created_at', { ascending: false })
     .limit(100)
 
+  const allLeads = leads ?? []
+  const stats = {
+    total: allLeads.length,
+    new: allLeads.filter((l) => l.status === 'new').length,
+    intake_complete: allLeads.filter((l) => l.status === 'intake_complete').length,
+    scheduled: allLeads.filter((l) => l.status === 'scheduled').length,
+    recorded: allLeads.filter((l) => l.status === 'recorded').length,
+  }
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-        <p className="text-sm text-gray-500">{clients?.length ?? 0} total clients</p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500">Overview of your podcast leads pipeline</p>
       </div>
 
-      <ClientTable clients={clients ?? []} />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <StatCard label="Total Leads" value={stats.total} color="text-gray-900" />
+        <StatCard label="New" value={stats.new} color="text-blue-600" />
+        <StatCard label="Intake Done" value={stats.intake_complete} color="text-green-600" />
+        <StatCard label="Scheduled" value={stats.scheduled} color="text-purple-600" />
+        <StatCard label="Recorded" value={stats.recorded} color="text-amber-600" />
+      </div>
+
+      {/* Recent Leads */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-gray-900">Recent Podcast Leads</h2>
+        <Link href="/admin/podcast" className="text-sm text-brand-gradient-end hover:underline font-medium">
+          View all &rarr;
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/50">
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Name</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Phone</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Preferred Date</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Intake</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Submitted</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {allLeads.slice(0, 20).map((lead) => {
+                const hasIntake = Array.isArray(lead.podcast_intake)
+                  ? lead.podcast_intake.length > 0
+                  : !!lead.podcast_intake
+                return (
+                  <tr key={lead.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-gray-900">{lead.full_name}</td>
+                    <td className="px-4 py-3 text-gray-600">{lead.email}</td>
+                    <td className="px-4 py-3 text-gray-600">{lead.phone}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {new Date(lead.preferred_date + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short', day: 'numeric', year: 'numeric',
+                      })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || statusColors.new}`}>
+                        {lead.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {hasIntake ? (
+                        <span className="text-green-600 font-medium text-xs">Complete</span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">Pending</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">
+                      {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link href={`/admin/podcast/${lead.id}`} className="text-brand-gradient-end hover:underline text-xs font-medium">
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                )
+              })}
+              {allLeads.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
+                    No podcast leads yet. Share your <a href="/podcast" className="text-brand-gradient-end hover:underline">podcast page</a> to start collecting leads.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className={`text-3xl font-black ${color}`}>{value}</div>
+      <div className="text-xs text-gray-500 mt-1 font-medium">{label}</div>
     </div>
   )
 }

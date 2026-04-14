@@ -23,30 +23,30 @@ export function ProjectionChart({ currentPaybackMonths, ltv, cac }: ProjectionCh
       label: 'Current',
       payback: currentPaybackMonths,
       ltvCac: ltv / cac,
-      fill: '#9ca3af',
+      fill: '#fde07a',
     },
     {
       label: '+10% Cash',
       payback: currentPaybackMonths * 0.9,
       ltvCac: (ltv / cac) * 1.1,
-      fill: '#6b7280',
+      fill: '#ffb303',
     },
     {
       label: '+20% Margin',
       payback: currentPaybackMonths * 0.8,
       ltvCac: (ltv / cac) * 1.2,
-      fill: '#374151',
+      fill: '#ff9a02',
     },
     {
       label: 'Crucible',
       payback: 1,
       ltvCac: ltv / cac,
-      fill: '#111827',
+      fill: '#ff8800',
     },
   ]
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5">
+    <div className="bg-white rounded-[25px] border border-gray-200 p-5">
       <h3 className="font-semibold text-gray-900 mb-1">Payback Scenarios</h3>
       <p className="text-xs text-gray-500 mb-4">
         What your payback period looks like with Crucible Coaching — CAC fully recovered in month 1

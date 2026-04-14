@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { AdminNav } from '@/components/admin/AdminNav'
 
 export default async function AdminLayout({
   children,
@@ -13,7 +14,7 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, full_name, email')
     .eq('id', user.id)
     .single()
 
@@ -21,12 +22,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <span className="font-bold text-lg">Crucible Admin</span>
-          <a href="/admin" className="text-sm text-gray-600 hover:text-gray-900">Clients</a>
-        </div>
-      </div>
+      <AdminNav name={profile.full_name || profile.email} />
       <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
     </div>
   )

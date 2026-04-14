@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError(error.message)
@@ -26,7 +26,14 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/intake')
+    // Check if user is admin and redirect accordingly
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+
+    router.push(profile?.role === 'admin' ? '/admin' : '/intake')
     router.refresh()
   }
 

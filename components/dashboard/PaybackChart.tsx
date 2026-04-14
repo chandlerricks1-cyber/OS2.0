@@ -38,7 +38,7 @@ export function PaybackChart({
   })
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5">
+    <div className="bg-white rounded-[25px] border border-gray-200 p-5">
       <h3 className="font-semibold text-gray-900 mb-1">CAC Payback Curve</h3>
       <p className="text-xs text-gray-500 mb-4">
         Cumulative cash collected vs. your CAC of ${cac.toLocaleString()}
@@ -63,7 +63,7 @@ export function PaybackChart({
           <Line
             type="monotone"
             dataKey="revenue"
-            stroke="#111827"
+            stroke="#ff8800"
             strokeWidth={2}
             dot={false}
           />
