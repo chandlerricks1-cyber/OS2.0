@@ -7,7 +7,8 @@ import { MetricsEditor } from '@/components/dashboard/MetricsEditor'
 import { formatCurrency, formatMonths, formatPercent, formatNumber } from '@/lib/utils/metrics'
 import type { PrimaryOffer, CROBlocker } from '@/types/intake'
 import Link from 'next/link'
-import { Package, AlertTriangle } from 'lucide-react'
+import { Package, AlertTriangle, LayoutGrid, ArrowRight } from 'lucide-react'
+import { OFFER_TYPES, OFFER_TYPE_LABELS, type OfferType } from '@/types/offer'
 import { BookCallButton } from '@/components/dashboard/BookCallButton'
 
 export default async function DashboardPage() {
@@ -36,6 +37,26 @@ export default async function DashboardPage() {
 
   const offers = metrics.primary_offers as PrimaryOffer[] | null
   const blockers = metrics.cro_blockers as CROBlocker[] | null
+
+  const { data: moneyOffers } = await supabase
+    .from('offers')
+    .select('offer_type')
+    .eq('user_id', user.id)
+    .eq('is_active', true)
+  const { count: milestoneCount } = await supabase
+    .from('milestones')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+  const counts: Record<OfferType, number> = { attraction: 0, core: 0, upsell: 0, downsell: 0, continuity: 0 }
+  for (const row of (moneyOffers as { offer_type: OfferType }[] | null) ?? []) {
+    counts[row.offer_type] = (counts[row.offer_type] ?? 0) + 1
+  }
+  const totalMoneyOffers = Object.values(counts).reduce((a, b) => a + b, 0)
+  const gaps: string[] = []
+  if (counts.attraction === 0) gaps.push('No attraction offer')
+  if (counts.core === 0) gaps.push('No core offer')
+  if (counts.continuity === 0) gaps.push('No continuity offer')
+  if ((milestoneCount ?? 0) === 0 && totalMoneyOffers > 0) gaps.push('No milestones mapped')
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -82,7 +103,7 @@ export default async function DashboardPage() {
               href="/dashboard/report"
               className="btn-gradient px-4 py-2 inline-block text-sm"
             >
-              View Full Report →
+              View Acquisition Report →
             </Link>
           </div>
         </div>
@@ -114,10 +135,15 @@ export default async function DashboardPage() {
       </div>
 
       {/* Row 2: Revenue & sales */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
           label="Monthly Revenue"
           value={formatCurrency(metrics.monthly_revenue)}
+        />
+        <MetricCard
+          label="Cash Collected First 30 Days"
+          value={formatCurrency(metrics.cash_collected_first_30_days)}
+          description="Per new customer"
         />
         <MetricCard
           label="New Customers/Mo"
@@ -162,6 +188,54 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
+      {/* Money Model tile */}
+      <Link
+        href="/dashboard/money-model"
+        className="block bg-white border border-gray-200 rounded-[25px] p-6 hover:border-brand-gradient-end/40 hover:shadow-elevated transition-all"
+      >
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center flex-shrink-0">
+              <LayoutGrid className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Money Model</h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {totalMoneyOffers === 0
+                  ? 'Organize your offers and map the customer journey'
+                  : `${totalMoneyOffers} offer${totalMoneyOffers === 1 ? '' : 's'} · ${milestoneCount ?? 0} milestone${milestoneCount === 1 ? '' : 's'}`}
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-5 h-5 text-gray-400 mt-2" />
+        </div>
+        {totalMoneyOffers > 0 && (
+          <div className="grid grid-cols-5 gap-2 mb-3">
+            {OFFER_TYPES.map((t) => (
+              <div
+                key={t}
+                className="border border-gray-100 rounded-xl px-2 py-2 bg-gray-50 text-center"
+              >
+                <div className="text-xs text-gray-500">{OFFER_TYPE_LABELS[t]}</div>
+                <div className="text-lg font-bold text-gray-900">{counts[t]}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {gaps.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {gaps.map((g) => (
+              <span
+                key={g}
+                className="text-[11px] font-medium text-brand-orange-dark bg-brand-cream-100 px-2.5 py-1 rounded-full"
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+        )}
+      </Link>
+
       {/* Primary Offers */}
       {offers && offers.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-[25px] p-8">
@@ -192,7 +266,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* CRO Blockers */}
+      {/* Growth Blockers */}
       {blockers && blockers.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-[25px] p-8">
           <div className="flex items-center justify-between mb-5">
@@ -201,7 +275,7 @@ export default async function DashboardPage() {
                 <AlertTriangle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Your Top CRO Blockers</h2>
+                <h2 className="text-xl font-bold text-gray-900">Your Top Growth Blockers</h2>
                 <p className="text-xs text-gray-400 mt-0.5">Ranked by estimated revenue impact</p>
               </div>
             </div>

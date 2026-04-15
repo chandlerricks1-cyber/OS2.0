@@ -152,3 +152,51 @@ ALTER TABLE business_metrics
   ADD COLUMN IF NOT EXISTS industry       TEXT,
   ADD COLUMN IF NOT EXISTS primary_offers JSONB,
   ADD COLUMN IF NOT EXISTS cro_blockers   JSONB;
+
+-- Migration v3: Money Model (offers, milestones, milestone_offers)
+-- See supabase/migrations/20260415_money_model.sql for the full migration
+-- including indexes and RLS policies.
+CREATE TABLE IF NOT EXISTS offers (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  name                TEXT NOT NULL,
+  offer_type          TEXT NOT NULL CHECK (offer_type IN ('attraction','core','upsell','downsell','continuity')),
+  price               TEXT,
+  what_customer_gets  TEXT,
+  why_do_it           TEXT,
+  when_offered        TEXT,
+  trigger             TEXT,
+  sales_pitch         TEXT,
+  thumbnail_url       TEXT,
+  short_description   TEXT,
+  video_url           TEXT,
+  classroom_body      TEXT,
+  sort_order          INTEGER NOT NULL DEFAULT 0,
+  is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS milestones (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  description TEXT,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS milestone_offers (
+  milestone_id UUID NOT NULL REFERENCES milestones(id) ON DELETE CASCADE,
+  offer_id     UUID NOT NULL REFERENCES offers(id) ON DELETE CASCADE,
+  sequence     INTEGER NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (milestone_id, offer_id)
+);
+
+-- Migration v4: Crucible Pro (appointments, tasks, recordings, rocks, team)
+-- See supabase/migrations/20260416_crucible_pro.sql for the full migration
+-- including ALTER on profiles (ghl_contact_id) and subscriptions
+-- (monthly_consulting_fee, client_agreement_url, next_billing_date),
+-- new tables, indexes, RLS policies, and the public.is_admin() helper.

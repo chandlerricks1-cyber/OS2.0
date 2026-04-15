@@ -16,8 +16,8 @@ export default async function ReportPage() {
           <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900 mb-1 inline-block">
             ← Back to Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Your CAC Analysis Report</h1>
-          <p className="text-sm text-gray-500">AI-generated based on your intake responses</p>
+          <h1 className="text-2xl font-bold text-gray-900">Crucible Customer Acquisition Report</h1>
+          <p className="text-sm text-gray-500">AI-generated analysis of your unit economics and growth levers</p>
         </div>
       </div>
 

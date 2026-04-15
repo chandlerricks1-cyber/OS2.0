@@ -197,3 +197,61 @@ export async function addContactNote(input: AddContactNoteInput): Promise<{ note
     body: JSON.stringify({ body: input.body, userId: input.userId }),
   })
 }
+
+// ---------- Calendar / Appointments ----------
+
+export interface GhlCalendarEvent {
+  id: string
+  title?: string
+  appointmentStatus?: string
+  assignedUserId?: string
+  contactId?: string
+  calendarId?: string
+  startTime?: string
+  endTime?: string
+  address?: string
+  meetingLocationType?: string
+  locationId?: string
+  users?: Array<{ id: string; name?: string; email?: string }>
+  notes?: string
+}
+
+export async function listCalendarEvents(params: {
+  startTime: string
+  endTime: string
+  contactId?: string
+  calendarId?: string
+  userId?: string
+}): Promise<GhlCalendarEvent[]> {
+  const { locationId } = getConfig()
+  const qs = new URLSearchParams({
+    locationId,
+    startTime: params.startTime,
+    endTime: params.endTime,
+  })
+  if (params.contactId) qs.set('contactId', params.contactId)
+  if (params.calendarId) qs.set('calendarId', params.calendarId)
+  if (params.userId) qs.set('userId', params.userId)
+  const data = await ghlFetch<{ events?: GhlCalendarEvent[] }>(`/calendars/events?${qs.toString()}`)
+  return data.events ?? []
+}
+
+export interface UpdateCalendarEventInput {
+  title?: string
+  startTime?: string
+  endTime?: string
+  appointmentStatus?: string
+  address?: string
+  notes?: string
+}
+
+export async function updateCalendarEvent(
+  eventId: string,
+  input: UpdateCalendarEventInput
+): Promise<GhlCalendarEvent> {
+  const data = await ghlFetch<{ event?: GhlCalendarEvent } & GhlCalendarEvent>(
+    `/calendars/events/appointments/${eventId}`,
+    { method: 'PUT', body: JSON.stringify(input) }
+  )
+  return (data.event ?? data) as GhlCalendarEvent
+}

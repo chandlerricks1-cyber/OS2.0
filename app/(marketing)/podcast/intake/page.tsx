@@ -119,7 +119,7 @@ function PodcastIntakeContent() {
         return
       }
 
-      router.push('/podcast/thank-you')
+      router.push('/dashboard')
     } catch {
       setErrors({ form: 'Something went wrong. Please try again.' })
     } finally {

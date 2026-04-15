@@ -1,0 +1,149 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { CrucibleProShell } from '@/components/crucible-pro/CrucibleProShell'
+import type {
+  Appointment,
+  CallRecording,
+  ClientOption,
+  Rock,
+  Task,
+  TeamMember,
+  BillingSnapshot,
+} from '@/types/cruciblePro'
+
+const VALID_TABS = new Set(['appointments', 'recordings', 'goals', 'billing'])
+
+export default async function CrucibleProPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; client?: string }>
+}) {
+  const { tab, client: clientParam } = await searchParams
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, email, full_name, role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
+
+  let clients: ClientOption[] = []
+  let targetUserId = user.id
+
+  if (isAdmin) {
+    const { data: list } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('role', 'client')
+      .order('full_name', { ascending: true, nullsFirst: false })
+      .order('email')
+    clients = (list as ClientOption[] | null) ?? []
+    if (clientParam && clients.some((c) => c.id === clientParam)) {
+      targetUserId = clientParam
+    } else if (clients.length > 0) {
+      targetUserId = clients[0].id
+    }
+  }
+
+  const [
+    { data: appointments },
+    { data: recordings },
+    { data: tasks },
+    { data: teamMembers },
+    { data: rocks },
+    { data: metrics },
+    { data: subscription },
+  ] = await Promise.all([
+    supabase
+      .from('crucible_appointments')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('starts_at', { ascending: true }),
+    supabase
+      .from('crucible_call_recordings')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('call_date', { ascending: false }),
+    supabase
+      .from('crucible_tasks')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('crucible_team_members')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('crucible_rocks')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('business_metrics')
+      .select('monthly_revenue, required_30_day_revenue, raw_extraction')
+      .eq('user_id', targetUserId)
+      .maybeSingle(),
+    supabase
+      .from('subscriptions')
+      .select(
+        'monthly_consulting_fee, client_agreement_url, next_billing_date, current_period_end, status, plan_type, stripe_customer_id, stripe_subscription_id'
+      )
+      .eq('user_id', targetUserId)
+      .maybeSingle(),
+  ])
+
+  const revenueGoal = extractRevenueGoal(metrics)
+
+  const billing: BillingSnapshot = {
+    monthly_consulting_fee: subscription?.monthly_consulting_fee ?? null,
+    client_agreement_url: subscription?.client_agreement_url ?? null,
+    next_billing_date: subscription?.next_billing_date ?? null,
+    current_period_end: subscription?.current_period_end ?? null,
+    status: subscription?.status ?? 'inactive',
+    plan_type: subscription?.plan_type ?? null,
+    stripe_customer_id: subscription?.stripe_customer_id ?? null,
+    has_stripe_subscription: Boolean(subscription?.stripe_subscription_id),
+  }
+
+  const initialTab =
+    tab && VALID_TABS.has(tab) ? (tab as 'appointments' | 'recordings' | 'goals' | 'billing') : 'appointments'
+
+  return (
+    <CrucibleProShell
+      isAdmin={isAdmin}
+      clients={clients}
+      targetUserId={targetUserId}
+      initialTab={initialTab}
+      appointments={(appointments as Appointment[] | null) ?? []}
+      recordings={(recordings as CallRecording[] | null) ?? []}
+      tasks={(tasks as Task[] | null) ?? []}
+      teamMembers={(teamMembers as TeamMember[] | null) ?? []}
+      rocks={(rocks as Rock[] | null) ?? []}
+      revenueGoal={revenueGoal}
+      billing={billing}
+    />
+  )
+}
+
+function extractRevenueGoal(metrics: unknown): number | null {
+  if (!metrics || typeof metrics !== 'object') return null
+  const m = metrics as Record<string, unknown>
+  if (typeof m.required_30_day_revenue === 'number') {
+    return m.required_30_day_revenue * 12
+  }
+  const raw = m.raw_extraction
+  if (raw && typeof raw === 'object') {
+    const r = raw as Record<string, unknown>
+    if (typeof r.annual_revenue_goal === 'number') return r.annual_revenue_goal
+    if (typeof r.revenue_goal === 'number') return r.revenue_goal
+  }
+  return null
+}
