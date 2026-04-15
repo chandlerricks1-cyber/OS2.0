@@ -62,7 +62,7 @@ export default async function DashboardPage() {
     <div className="max-w-5xl mx-auto space-y-6">
 
       {/* Identity Header */}
-      <div className="bg-white border border-gray-200 rounded-[25px] px-6 py-5 flex items-center justify-between gap-4">
+      <div className="bg-white border border-gray-200 rounded-[25px] px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
             {metrics.company_name ? metrics.company_name[0].toUpperCase() : '?'}
@@ -90,20 +90,20 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-wrap sm:flex-shrink-0">
           {metrics.revenue_goal_1yr && (
             <div className="text-right hidden sm:block">
               <p className="text-xs text-gray-400">1-Year Revenue Goal</p>
               <p className="text-sm font-semibold text-gray-900">{formatCurrency(metrics.revenue_goal_1yr)}</p>
             </div>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <MetricsEditor metrics={metrics} />
             <Link
               href="/dashboard/report"
-              className="btn-gradient px-4 py-2 inline-block text-sm"
+              className="btn-gradient px-4 py-2 inline-block text-sm whitespace-nowrap"
             >
-              View Acquisition Report →
+              View Report →
             </Link>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
           <ArrowRight className="w-5 h-5 text-gray-400 mt-2" />
         </div>
         {totalMoneyOffers > 0 && (
-          <div className="grid grid-cols-5 gap-2 mb-3">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-3">
             {OFFER_TYPES.map((t) => (
               <div
                 key={t}
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end rounded-[25px] p-6 flex items-center justify-between shadow-[0_8px_24px_rgba(255,136,0,0.2)]">
+      <div className="bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end rounded-[25px] p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_8px_24px_rgba(255,136,0,0.2)]">
         <div>
           <p className="font-bold text-white text-base">Want help executing this plan?</p>
           <p className="text-white/85 text-sm mt-0.5">Book a strategy call to review your numbers and build your roadmap together.</p>

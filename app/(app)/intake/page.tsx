@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Sun, Moon, Sparkles, RotateCcw } from 'lucide-react'
+import { Sun, Moon, Sparkles, RotateCcw, BarChart3, X } from 'lucide-react'
 import { useChat } from '@/hooks/useChat'
 import { useSystemTheme } from '@/hooks/useSystemTheme'
 import { DarkChatWindow } from '@/components/intake/DarkChatWindow'
@@ -11,6 +11,7 @@ import { MetricProgressPanel } from '@/components/intake/MetricProgressPanel'
 export default function IntakePage() {
   const router = useRouter()
   const { isDark, toggle } = useSystemTheme()
+  const [panelOpen, setPanelOpen] = useState(false)
 
   const {
     messages,
@@ -58,7 +59,7 @@ export default function IntakePage() {
 
   return (
     <div
-      className={`-m-6 flex overflow-hidden transition-colors duration-300 ${pageBg}`}
+      className={`-m-4 sm:-m-6 flex overflow-hidden transition-colors duration-300 ${pageBg}`}
       style={{ height: 'calc(100svh - 49px)' }}
     >
       {/* Left: Chat */}
@@ -77,6 +78,14 @@ export default function IntakePage() {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setPanelOpen(true)}
+              className={`lg:hidden h-9 px-3 rounded-xl flex items-center gap-1.5 text-xs font-medium transition-colors ${toggleCls}`}
+              aria-label="Show business profile"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              Progress
+            </button>
             {messages.length > 0 && (
               <button
                 onClick={handleReset}
@@ -125,8 +134,31 @@ export default function IntakePage() {
         </div>
       </div>
 
-      {/* Right: Metric Progress Panel */}
-      <div className={`w-72 xl:w-80 shrink-0 border-l overflow-hidden flex flex-col transition-colors duration-300 ${headerBorder} ${panelBg}`}>
+      {/* Right: Metric Progress Panel (desktop) */}
+      <div className={`hidden lg:flex w-72 xl:w-80 shrink-0 border-l overflow-hidden flex-col transition-colors duration-300 ${headerBorder} ${panelBg}`}>
+        <MetricProgressPanel partialMetrics={partialMetrics} isDark={isDark} />
+      </div>
+
+      {/* Mobile drawer */}
+      <div
+        onClick={() => setPanelOpen(false)}
+        className={`lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity ${
+          panelOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden="true"
+      />
+      <div
+        className={`lg:hidden fixed inset-y-0 right-0 w-[85%] max-w-sm z-50 flex flex-col transition-transform duration-300 ${panelBg} ${
+          panelOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <button
+          onClick={() => setPanelOpen(false)}
+          aria-label="Close"
+          className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-md flex items-center justify-center ${toggleCls}`}
+        >
+          <X className="w-4 h-4" />
+        </button>
         <MetricProgressPanel partialMetrics={partialMetrics} isDark={isDark} />
       </div>
     </div>

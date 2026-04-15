@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Menu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface NavbarProps {
@@ -8,9 +9,10 @@ interface NavbarProps {
     email: string
     full_name: string | null
   } | null
+  onMenuClick?: () => void
 }
 
-export function Navbar({ user }: NavbarProps) {
+export function Navbar({ user, onMenuClick }: NavbarProps) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -21,13 +23,22 @@ export function Navbar({ user }: NavbarProps) {
   }
 
   return (
-    <header className="border-b border-brand-cream-100 bg-brand-cream px-6 py-3 flex items-center justify-between">
-      <div className="text-sm font-medium text-brand-dark/60">
-        {user?.full_name ?? user?.email ?? 'Account'}
+    <header className="border-b border-brand-cream-100 bg-brand-cream px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-30">
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center text-brand-dark/70 hover:bg-brand-cream-100 transition-colors -ml-1"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="text-sm font-medium text-brand-dark/60 truncate">
+          {user?.full_name ?? user?.email ?? 'Account'}
+        </div>
       </div>
       <button
         onClick={handleSignOut}
-        className="text-sm text-brand-dark/40 hover:text-brand-dark transition-colors font-medium"
+        className="text-sm text-brand-dark/40 hover:text-brand-dark transition-colors font-medium shrink-0"
       >
         Sign out
       </button>

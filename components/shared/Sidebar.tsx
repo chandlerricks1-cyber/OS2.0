@@ -1,8 +1,9 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, LayoutGrid, Flame } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, Flame, X } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 
@@ -52,73 +53,108 @@ const navItems = [
 ]
 
 function isActivePath(pathname: string, href: string) {
-  // Exact match for any route, OR subroute with trailing slash.
-  // Special case: /dashboard should NOT light up when on /dashboard/money-model.
   if (pathname === href) return true
   if (href === '/dashboard') return false
   return pathname.startsWith(href + '/')
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean
+  onMobileClose?: () => void
+}
+
+export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const pathname = usePathname()
   const { collapsed, toggle } = useSidebarCollapsed()
 
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = '' }
+    }
+  }, [mobileOpen])
+
+  const widthCls = collapsed ? 'md:w-20' : 'md:w-56'
+
   return (
-    <aside
-      className={`bg-brand-dark flex flex-col transition-[width] duration-200 ${
-        collapsed ? 'w-20' : 'w-56'
-      }`}
-    >
+    <>
+      {/* Mobile backdrop */}
       <div
-        className={`relative border-b border-white/10 flex items-center justify-center ${
-          collapsed ? 'py-4 px-2' : 'py-5 px-4'
+        onClick={onMobileClose}
+        className={`md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity ${
+          mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`bg-brand-dark flex flex-col transition-transform md:transition-[width] duration-200
+          fixed md:sticky md:top-0 inset-y-0 left-0 z-50
+          w-64 ${widthCls} md:h-screen
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
-        <button
-          onClick={toggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="absolute top-2 right-2 w-6 h-6 rounded-md bg-white/5 hover:bg-white/15 text-white/60 hover:text-white flex items-center justify-center transition-colors"
+        <div
+          className={`relative border-b border-white/10 flex items-center justify-center ${
+            collapsed ? 'md:py-4 md:px-2 py-5 px-4' : 'py-5 px-4'
+          }`}
         >
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-        </button>
-        {collapsed ? (
-          <Logo height={40} variant="icon" />
-        ) : (
-          <Logo height={90} variant="light" />
-        )}
-      </div>
+          {/* Mobile close */}
+          <button
+            onClick={onMobileClose}
+            aria-label="Close menu"
+            className="md:hidden absolute top-2 right-2 w-8 h-8 rounded-md bg-white/5 hover:bg-white/15 text-white/60 hover:text-white flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          {/* Desktop collapse toggle */}
+          <button
+            onClick={toggle}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="hidden md:flex absolute top-2 right-2 w-6 h-6 rounded-md bg-white/5 hover:bg-white/15 text-white/60 hover:text-white items-center justify-center transition-colors"
+          >
+            {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+          </button>
+          {collapsed ? (
+            <>
+              <span className="md:hidden"><Logo height={90} variant="light" /></span>
+              <span className="hidden md:inline"><Logo height={40} variant="icon" /></span>
+            </>
+          ) : (
+            <Logo height={90} variant="light" />
+          )}
+        </div>
 
-      <nav className={`flex-1 py-4 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
-        {navItems.map((item) => {
-          const isActive = isActivePath(pathname, item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={collapsed ? item.label : undefined}
-              className={`relative flex items-center rounded-lg text-sm font-medium transition-all ${
-                collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-3 py-2.5'
-              } ${
-                isActive
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/50 hover:bg-white/8 hover:text-white/80'
-              }`}
-            >
-              {isActive && !collapsed && (
-                <span className="absolute left-0 w-0.5 h-5 bg-brand-orange rounded-full" />
-              )}
-              <span className={isActive ? 'text-brand-orange' : ''}>{item.icon}</span>
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          )
-        })}
-      </nav>
+        <nav className={`flex-1 py-4 space-y-0.5 ${collapsed ? 'md:px-2 px-3' : 'px-3'}`}>
+          {navItems.map((item) => {
+            const isActive = isActivePath(pathname, item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onMobileClose}
+                title={collapsed ? item.label : undefined}
+                className={`relative flex items-center rounded-lg text-sm font-medium transition-all gap-3 px-3 py-2.5
+                  ${collapsed ? 'md:justify-center md:px-0 md:py-3 md:gap-0' : ''}
+                  ${isActive
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                  }`}
+              >
+                {isActive && !collapsed && (
+                  <span className="absolute left-0 w-0.5 h-5 bg-brand-orange rounded-full" />
+                )}
+                <span className={isActive ? 'text-brand-orange' : ''}>{item.icon}</span>
+                <span className={collapsed ? 'md:hidden' : ''}>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
 
-      {!collapsed && (
-        <div className="px-4 py-4 border-t border-white/10">
+        <div className={`px-4 py-4 border-t border-white/10 ${collapsed ? 'md:hidden' : ''}`}>
           <p className="text-xs text-white/25 font-medium tracking-wide uppercase">Crucible OS</p>
         </div>
-      )}
-    </aside>
+      </aside>
+    </>
   )
 }

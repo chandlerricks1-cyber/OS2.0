@@ -88,10 +88,11 @@ export function CrucibleProShell({
           href={URGENT_HELP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-brand-orange hover:brightness-110 transition"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-brand-orange hover:brightness-110 transition"
         >
           <AlertCircle className="w-4 h-4" />
-          Need Urgent Help? Schedule a help call
+          <span className="sm:hidden">Urgent help</span>
+          <span className="hidden sm:inline">Need Urgent Help? Schedule a help call</span>
         </a>
       </div>
 

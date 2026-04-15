@@ -23,11 +23,11 @@ export function AdminNav({ name }: { name: string }) {
   }
 
   return (
-    <div className="border-b bg-white px-6 py-3">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <span className="font-bold text-lg text-gray-900">Crucible Admin</span>
-          <nav className="flex items-center gap-1">
+    <div className="border-b bg-white px-4 sm:px-6 py-3 sticky top-0 z-30">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
+          <span className="font-bold text-base sm:text-lg text-gray-900 shrink-0">Crucible Admin</span>
+          <nav className="flex items-center gap-1 overflow-x-auto -mx-1 px-1 scrollbar-none">
             {navLinks.map((link) => {
               const isActive = link.exact
                 ? pathname === link.href
@@ -36,7 +36,7 @@ export function AdminNav({ name }: { name: string }) {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                  className={`text-sm px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                     isActive
                       ? 'bg-brand-gradient-end/10 text-brand-gradient-end font-semibold'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

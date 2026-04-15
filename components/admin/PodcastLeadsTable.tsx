@@ -132,8 +132,72 @@ export function PodcastLeadsTable({ leads }: { leads: Lead[] }) {
         </p>
       )}
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {filtered.map((lead) => {
+          const hasIntake = Array.isArray(lead.podcast_intake)
+            ? lead.podcast_intake.length > 0
+            : !!lead.podcast_intake
+          const tags = Array.isArray(lead.podcast_lead_tags) ? lead.podcast_lead_tags : []
+          return (
+            <Link
+              key={lead.id}
+              href={`/admin/podcast/${lead.id}`}
+              className="block bg-white rounded-2xl border border-gray-200 p-4 active:bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{lead.full_name}</p>
+                  <p className="text-gray-500 text-xs truncate">{lead.email}</p>
+                  <p className="text-gray-500 text-xs">{lead.phone}</p>
+                </div>
+                <span className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || statusColors.new}`}>
+                  {lead.status.replace('_', ' ')}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs mt-3 pt-3 border-t border-gray-100">
+                <div>
+                  <span className="text-gray-400">Preferred: </span>
+                  <span className="text-gray-700">
+                    {new Date(lead.preferred_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Submitted: </span>
+                  <span className="text-gray-700">
+                    {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-400">Intake: </span>
+                  {hasIntake ? (
+                    <span className="text-green-600 font-medium">Complete</span>
+                  ) : (
+                    <span className="text-gray-500">Pending</span>
+                  )}
+                </div>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {tags.map((t) => (
+                    <span key={t.tag} className="inline-block px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">
+                      {t.tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </Link>
+          )
+        })}
+        {filtered.length === 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-400 text-sm">
+            {hasActiveFilters ? 'No leads match your filters' : 'No podcast leads yet'}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

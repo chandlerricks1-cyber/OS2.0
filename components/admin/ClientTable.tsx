@@ -44,7 +44,68 @@ export function ClientTable({ clients }: ClientTableProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <>
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {clients.map((client) => {
+          const session = client.intake_sessions?.[0]
+          const subscription = client.subscriptions?.[0]
+          const metrics = client.business_metrics?.[0]
+          const tags = client.client_tags ?? []
+          return (
+            <Link
+              key={client.id}
+              href={`/admin/clients/${client.id}`}
+              className="block bg-white rounded-2xl border border-gray-200 p-4 active:bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{client.full_name ?? '—'}</p>
+                  <p className="text-gray-400 text-xs truncate">{client.email}</p>
+                </div>
+                <span className="text-xs text-gray-400 shrink-0">View →</span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                <div>
+                  <p className="text-gray-400 uppercase tracking-wide text-[10px] mb-0.5">Intake</p>
+                  <StatusBadge status={session?.status ?? 'not started'} />
+                </div>
+                <div>
+                  <p className="text-gray-400 uppercase tracking-wide text-[10px] mb-0.5">Subscription</p>
+                  <StatusBadge status={subscription?.status ?? 'inactive'} />
+                </div>
+                <div>
+                  <p className="text-gray-400 uppercase tracking-wide text-[10px] mb-0.5">CAC</p>
+                  <p className="text-gray-800">{formatCurrency(metrics?.cac ?? null)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 uppercase tracking-wide text-[10px] mb-0.5">LTV</p>
+                  <p className="text-gray-800">{formatCurrency(metrics?.ltv ?? null)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 uppercase tracking-wide text-[10px] mb-0.5">Payback</p>
+                  <p className="text-gray-800">{formatMonths(metrics?.cac_payback_months ?? null)}</p>
+                </div>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
+                  {tags.slice(0, 3).map((t) => (
+                    <span key={t.tag} className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded">
+                      {t.tag}
+                    </span>
+                  ))}
+                  {tags.length > 3 && (
+                    <span className="text-xs text-gray-400">+{tags.length - 3}</span>
+                  )}
+                </div>
+              )}
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-200 overflow-hidden">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50">
@@ -108,6 +169,7 @@ export function ClientTable({ clients }: ClientTableProps) {
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   )
 }

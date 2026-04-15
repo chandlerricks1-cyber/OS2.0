@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-8">
         <StatCard label="Total Leads" value={stats.total} color="text-gray-900" />
         <StatCard label="New" value={stats.new} color="text-blue-600" />
         <StatCard label="Intake Done" value={stats.intake_complete} color="text-green-600" />
@@ -52,7 +52,45 @@ export default async function AdminDashboardPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {allLeads.slice(0, 20).map((lead) => {
+          const hasIntake = Array.isArray(lead.podcast_intake)
+            ? lead.podcast_intake.length > 0
+            : !!lead.podcast_intake
+          return (
+            <Link
+              key={lead.id}
+              href={`/admin/podcast/${lead.id}`}
+              className="block bg-white rounded-2xl border border-gray-200 p-4 active:bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{lead.full_name}</p>
+                  <p className="text-gray-500 text-xs truncate">{lead.email}</p>
+                </div>
+                <span className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || statusColors.new}`}>
+                  {lead.status.replace('_', ' ')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                <span>{lead.phone}</span>
+                <span>
+                  {hasIntake ? <span className="text-green-600 font-medium">Intake complete</span> : 'Intake pending'}
+                </span>
+              </div>
+            </Link>
+          )
+        })}
+        {allLeads.length === 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-400">
+            No podcast leads yet. Share your <a href="/podcast" className="text-brand-gradient-end hover:underline">podcast page</a>.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

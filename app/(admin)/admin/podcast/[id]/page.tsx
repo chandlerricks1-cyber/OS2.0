@@ -148,8 +148,8 @@ function IntakeSection({ title, children }: { title: string; children: React.Rea
 
 function Field({ label, value, long }: { label: string; value: string | null; long?: boolean }) {
   return (
-    <div className={long ? '' : 'flex items-baseline gap-3'}>
-      <span className="text-sm font-medium text-gray-500 min-w-[180px] shrink-0">{label}</span>
+    <div className={long ? '' : 'flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3'}>
+      <span className="text-sm font-medium text-gray-500 sm:min-w-[180px] shrink-0">{label}</span>
       {long ? (
         <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{value || <span className="text-gray-300 italic">Not provided</span>}</p>
       ) : (
