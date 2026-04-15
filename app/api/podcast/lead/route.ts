@@ -109,6 +109,18 @@ export async function POST(request: Request) {
         contactId: ghl.contactId,
         opportunityId: ghl.opportunityId,
       })
+      if (ghl.contactId || ghl.opportunityId) {
+        const { error: updateErr } = await supabase
+          .from('podcast_leads')
+          .update({
+            ghl_contact_id: ghl.contactId ?? null,
+            ghl_opportunity_id: ghl.opportunityId ?? null,
+          })
+          .eq('id', data.id)
+        if (updateErr) {
+          console.warn('[ghl] failed to persist GHL ids on podcast_leads:', updateErr.message)
+        }
+      }
     }
 
     return NextResponse.json({ id: data.id }, { status: 201 })

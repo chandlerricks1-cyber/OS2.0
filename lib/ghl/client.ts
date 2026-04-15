@@ -1,7 +1,7 @@
 const API_BASE = 'https://services.leadconnectorhq.com'
 const API_VERSION = '2021-07-28'
 
-export const PODCAST_PIPELINE_NAME = 'Podcast'
+export const PODCAST_PIPELINE_NAME = 'Podcast Funnel'
 export const PODCAST_STAGE_NAMES = [
   'New Lead',
   'Intake Submitted',
@@ -165,5 +165,35 @@ export async function createOpportunity(input: CreateOpportunityInput): Promise<
   return ghlFetch<CreateOpportunityResponse>(`/opportunities/`, {
     method: 'POST',
     body: JSON.stringify(body),
+  })
+}
+
+export interface UpdateOpportunityInput {
+  pipelineStageId?: string
+  name?: string
+  status?: 'open' | 'won' | 'lost' | 'abandoned'
+  monetaryValue?: number
+}
+
+export async function updateOpportunity(
+  opportunityId: string,
+  input: UpdateOpportunityInput
+): Promise<CreateOpportunityResponse> {
+  return ghlFetch<CreateOpportunityResponse>(`/opportunities/${opportunityId}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  })
+}
+
+export interface AddContactNoteInput {
+  contactId: string
+  body: string
+  userId?: string
+}
+
+export async function addContactNote(input: AddContactNoteInput): Promise<{ note?: { id: string } }> {
+  return ghlFetch(`/contacts/${input.contactId}/notes`, {
+    method: 'POST',
+    body: JSON.stringify({ body: input.body, userId: input.userId }),
   })
 }
