@@ -41,6 +41,7 @@ export interface Offer {
   classroom_body: string | null
   sort_order: number
   is_active: boolean
+  source: 'manual' | 'crucible_ai'
   created_at: string
   updated_at: string
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { X, Trash2, ExternalLink, Save } from 'lucide-react'
+import { X, Trash2, ExternalLink, Save, ShieldCheck, Check } from 'lucide-react'
 import { OFFER_TYPES, OFFER_TYPE_LABELS } from '@/types/offer'
 import type { Offer, OfferType } from '@/types/offer'
 
@@ -35,11 +35,13 @@ export function OfferDrawer({
   onClose,
   onSaved,
   onDeleted,
+  onAccepted,
 }: {
   offer: Offer
   onClose: () => void
   onSaved: (updated: Offer) => void
   onDeleted: (id: string) => void
+  onAccepted?: (id: string) => void
 }) {
   const [form, setForm] = useState<FormState>(toForm(offer))
   const [saving, setSaving] = useState(false)
@@ -98,7 +100,14 @@ export function OfferDrawer({
       <div className="flex-1 bg-black/40" onClick={onClose} />
       <aside className="w-full max-w-xl bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         <header className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="font-bold text-gray-900">Edit offer</h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-bold text-gray-900">Edit offer</h2>
+            {offer.source === 'crucible_ai' && (
+              <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> Crucible Approved
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <Link
               href={`/dashboard/money-model/classroom/${offer.id}`}
@@ -193,6 +202,14 @@ export function OfferDrawer({
             <Trash2 className="w-4 h-4" /> Delete
           </button>
           <div className="flex items-center gap-2">
+            {offer.source === 'crucible_ai' && onAccepted && (
+              <button
+                onClick={() => onAccepted(offer.id)}
+                className="text-sm px-4 py-2 rounded-xl font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors"
+              >
+                <Check className="w-4 h-4" /> Accept Offer
+              </button>
+            )}
             <button
               onClick={onClose}
               className="text-sm px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100"

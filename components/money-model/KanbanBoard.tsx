@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Plus, GripVertical, Calendar, Zap } from 'lucide-react'
+import { Plus, GripVertical, Calendar, Zap, Check, X, ShieldCheck } from 'lucide-react'
 import { OFFER_TYPES, OFFER_TYPE_LABELS, OFFER_TYPE_DESCRIPTIONS } from '@/types/offer'
 import type { Offer, OfferType } from '@/types/offer'
 import { OfferDrawer } from './OfferDrawer'
@@ -111,6 +111,26 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
     setEditing(null)
   }
 
+  async function handleAccept(id: string) {
+    const res = await fetch(`/api/offers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'manual' }),
+    })
+    if (!res.ok) return
+    const { offer: updated } = await res.json()
+    setOffers((prev) => prev.map((o) => (o.id === id ? (updated as Offer) : o)))
+    if (editing?.id === id) setEditing(updated as Offer)
+  }
+
+  async function handleRemove(id: string) {
+    const res = await fetch(`/api/offers/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setOffers((prev) => prev.filter((o) => o.id !== id))
+      if (editing?.id === id) setEditing(null)
+    }
+  }
+
   return (
     <>
       <DndContext
@@ -127,6 +147,8 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
               offers={columns[type]}
               onAdd={() => handleCreate(type)}
               onEdit={setEditing}
+              onAccept={handleAccept}
+              onRemove={handleRemove}
             />
           ))}
         </div>
@@ -140,6 +162,7 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
           onClose={() => setEditing(null)}
           onSaved={handleSave}
           onDeleted={handleDelete}
+          onAccepted={handleAccept}
         />
       )}
     </>
@@ -151,11 +174,15 @@ function Section({
   offers,
   onAdd,
   onEdit,
+  onAccept,
+  onRemove,
 }: {
   type: OfferType
   offers: Offer[]
   onAdd: () => void
   onEdit: (o: Offer) => void
+  onAccept: (id: string) => void
+  onRemove: (id: string) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: type })
 
@@ -192,7 +219,7 @@ function Section({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {offers.map((o) => (
-              <SortableOfferCard key={o.id} offer={o} onClick={() => onEdit(o)} />
+              <SortableOfferCard key={o.id} offer={o} onClick={() => onEdit(o)} onAccept={onAccept} onRemove={onRemove} />
             ))}
           </div>
         )}
@@ -201,7 +228,7 @@ function Section({
   )
 }
 
-function SortableOfferCard({ offer, onClick }: { offer: Offer; onClick: () => void }) {
+function SortableOfferCard({ offer, onClick, onAccept, onRemove }: { offer: Offer; onClick: () => void; onAccept: (id: string) => void; onRemove: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: offer.id })
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -210,7 +237,7 @@ function SortableOfferCard({ offer, onClick }: { offer: Offer; onClick: () => vo
   }
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <OfferCardView offer={offer} onClick={onClick} dragHandleProps={listeners} />
+      <OfferCardView offer={offer} onClick={onClick} dragHandleProps={listeners} onAccept={onAccept} onRemove={onRemove} />
     </div>
   )
 }
@@ -220,18 +247,34 @@ function OfferCardView({
   onClick,
   dragging,
   dragHandleProps,
+  onAccept,
+  onRemove,
 }: {
   offer: Offer
   onClick?: () => void
   dragging?: boolean
   dragHandleProps?: Record<string, unknown>
+  onAccept?: (id: string) => void
+  onRemove?: (id: string) => void
 }) {
+  const isCrucible = offer.source === 'crucible_ai'
+
   return (
     <div
-      className={`bg-white border rounded-2xl p-4 flex flex-col gap-3 transition-shadow h-full ${
-        dragging ? 'shadow-elevated border-brand-gradient-end' : 'border-gray-200 hover:shadow-card-soft hover:border-gray-300'
+      className={`relative bg-white border rounded-2xl p-4 flex flex-col gap-3 transition-shadow h-full ${
+        dragging
+          ? 'shadow-elevated border-brand-gradient-end'
+          : isCrucible
+          ? 'border-amber-400 border-2 ring-1 ring-amber-400/20 hover:shadow-card-soft'
+          : 'border-gray-200 hover:shadow-card-soft hover:border-gray-300'
       }`}
     >
+      {isCrucible && (
+        <span className="absolute -top-2.5 -right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 z-10">
+          <ShieldCheck className="w-3 h-3" /> Crucible Approved
+        </span>
+      )}
+
       <div className="flex items-start gap-2">
         <button
           {...(dragHandleProps ?? {})}
@@ -271,6 +314,23 @@ function OfferCardView({
             </div>
           )}
         </button>
+      )}
+
+      {isCrucible && onAccept && onRemove && (
+        <div className="flex items-center gap-2 pt-2 border-t border-amber-200">
+          <button
+            onClick={(e) => { e.stopPropagation(); onAccept(offer.id) }}
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <Check className="w-3.5 h-3.5" /> Keep
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove(offer.id) }}
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <X className="w-3.5 h-3.5" /> Remove
+          </button>
+        </div>
       )}
     </div>
   )

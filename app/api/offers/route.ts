@@ -19,6 +19,7 @@ const EDITABLE_FIELDS = [
   'classroom_body',
   'sort_order',
   'is_active',
+  'source',
 ] as const
 
 export async function GET() {

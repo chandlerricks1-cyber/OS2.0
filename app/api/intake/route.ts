@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { streamIntakeResponse, parseIntakeCompletion } from '@/lib/claude/intake'
 import { calculateDerivedMetrics } from '@/lib/utils/metrics'
+import { generateCrucibleOffers } from '@/lib/claude/offers'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -145,6 +147,16 @@ export async function POST(req: NextRequest) {
             }).eq('id', capturedSessionId)
 
             controller.enqueue(encoder.encode('\n\n[CRUCIBLE_COMPLETE]'))
+
+            // Fire-and-forget: generate Crucible Approved offer ideas
+            seedCrucibleOffers(
+              capturedUserId,
+              extracted as unknown as Record<string, unknown>,
+              derived as Record<string, unknown>,
+              capturedSessionId!
+            ).catch((err) => {
+              console.error('[Crucible Offers] generation failed:', err)
+            })
           }
         }
 
@@ -169,4 +181,60 @@ export async function POST(req: NextRequest) {
       'X-Session-Id': capturedSessionId,
     },
   })
+}
+
+// ── Crucible Approved Offer Generation (fire-and-forget) ────────────────
+async function seedCrucibleOffers(
+  userId: string,
+  extracted: Record<string, unknown>,
+  derived: Record<string, unknown>,
+  sessionId: string
+) {
+  // Prevent duplicates if intake is retried
+  const { count } = await supabaseAdmin
+    .from('offers')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('source', 'crucible_ai')
+    .eq('is_active', true)
+
+  if (count && count > 0) return
+
+  // Fetch last 20 intake messages for conversational context
+  const { data: msgs } = await supabaseAdmin
+    .from('intake_messages')
+    .select('role, content')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  const intakeMessages = (msgs ?? []).reverse().map((m) => ({
+    role: m.role as string,
+    content: m.content as string,
+  }))
+
+  // Build full metrics object for the prompt
+  const metrics: Record<string, unknown> = { ...extracted, ...derived }
+
+  const offers = await generateCrucibleOffers(metrics, intakeMessages)
+
+  // Insert all 8 offers with source: 'crucible_ai'
+  const rows = offers.map((o, i) => ({
+    user_id: userId,
+    name: o.name,
+    offer_type: o.offer_type,
+    price: o.price || null,
+    what_customer_gets: o.what_customer_gets || null,
+    why_do_it: o.why_do_it || null,
+    when_offered: o.when_offered || null,
+    trigger: o.trigger || null,
+    sales_pitch: o.sales_pitch || null,
+    sort_order: i,
+    source: 'crucible_ai',
+  }))
+
+  const { error } = await supabaseAdmin.from('offers').insert(rows)
+  if (error) {
+    console.error('[Crucible Offers] insert failed:', error.message)
+  }
 }
