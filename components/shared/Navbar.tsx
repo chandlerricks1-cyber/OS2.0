@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -8,6 +9,7 @@ interface NavbarProps {
   user: {
     email: string
     full_name: string | null
+    avatar_url?: string | null
   } | null
   onMenuClick?: () => void
 }
@@ -32,9 +34,15 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="text-sm font-medium text-brand-dark/60 truncate">
+        <Link
+          href="/settings"
+          className="flex items-center gap-2 text-sm font-medium text-brand-dark/60 hover:text-brand-dark transition-colors truncate"
+        >
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
+          ) : null}
           {user?.full_name ?? user?.email ?? 'Account'}
-        </div>
+        </Link>
       </div>
       <button
         onClick={handleSignOut}

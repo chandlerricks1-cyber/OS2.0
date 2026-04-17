@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/client'
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -23,10 +23,21 @@ export async function POST() {
     )
   }
 
+  // Support dynamic return path (e.g. from settings billing tab)
+  let returnPath = '/dashboard/crucible-pro?tab=billing'
+  try {
+    const body = await request.json().catch(() => null)
+    if (body?.return_path && typeof body.return_path === 'string') {
+      returnPath = body.return_path
+    }
+  } catch {
+    // No body or invalid JSON — use default return path
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${appUrl}/dashboard/crucible-pro?tab=billing`,
+    return_url: `${appUrl}${returnPath}`,
   })
 
   return NextResponse.json({ url: session.url })

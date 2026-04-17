@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/shared/Sidebar'
 import { Navbar } from '@/components/shared/Navbar'
 
 interface AppShellProps {
-  user: { email: string; full_name: string | null } | null
+  user: { email: string; full_name: string | null; avatar_url?: string | null } | null
   children: React.ReactNode
 }
 
