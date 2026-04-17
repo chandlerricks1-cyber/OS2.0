@@ -55,6 +55,10 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params
     const admin = await createAdminClient()
 
+    // Delete related rows first (foreign keys may not cascade)
+    await admin.from('podcast_intake').delete().eq('lead_id', id)
+    await admin.from('podcast_lead_tags').delete().eq('lead_id', id)
+
     const { error } = await admin
       .from('podcast_leads')
       .delete()
