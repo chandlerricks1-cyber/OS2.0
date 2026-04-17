@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Plus, GripVertical, Calendar, Zap, Check, X, ShieldCheck } from 'lucide-react'
+import { Plus, GripVertical, Calendar, Zap, Check, X, ShieldCheck, Sparkles, Loader2 } from 'lucide-react'
 import { OFFER_TYPES, OFFER_TYPE_LABELS, OFFER_TYPE_DESCRIPTIONS } from '@/types/offer'
 import type { Offer, OfferType } from '@/types/offer'
 import { OfferDrawer } from './OfferDrawer'
@@ -23,6 +23,7 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
   const [offers, setOffers] = useState<Offer[]>(initialOffers)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Offer | null>(null)
+  const [generating, setGenerating] = useState<OfferType | null>(null)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
@@ -131,6 +132,23 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
     }
   }
 
+  async function handleGenerate(type: OfferType) {
+    if (generating) return
+    setGenerating(type)
+    try {
+      const res = await fetch('/api/offers/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offer_type: type }),
+      })
+      if (!res.ok) return
+      const { offer } = await res.json()
+      setOffers((prev) => [...prev, offer as Offer])
+    } finally {
+      setGenerating(null)
+    }
+  }
+
   return (
     <>
       <DndContext
@@ -149,6 +167,8 @@ export function KanbanBoard({ initialOffers }: { initialOffers: Offer[] }) {
               onEdit={setEditing}
               onAccept={handleAccept}
               onRemove={handleRemove}
+              onGenerate={() => handleGenerate(type)}
+              isGenerating={generating === type}
             />
           ))}
         </div>
@@ -176,6 +196,8 @@ function Section({
   onEdit,
   onAccept,
   onRemove,
+  onGenerate,
+  isGenerating,
 }: {
   type: OfferType
   offers: Offer[]
@@ -183,6 +205,8 @@ function Section({
   onEdit: (o: Offer) => void
   onAccept: (id: string) => void
   onRemove: (id: string) => void
+  onGenerate: () => void
+  isGenerating: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: type })
 
@@ -203,12 +227,25 @@ function Section({
           </div>
           <p className="text-xs text-gray-500 mt-0.5">{OFFER_TYPE_DESCRIPTIONS[type]}</p>
         </div>
-        <button
-          onClick={onAdd}
-          className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-brand-gradient-end transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50"
-        >
-          <Plus className="w-4 h-4" /> Add offer
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onGenerate}
+            disabled={isGenerating}
+            className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+            ) : (
+              <><Sparkles className="w-4 h-4" /> Generate idea</>
+            )}
+          </button>
+          <button
+            onClick={onAdd}
+            className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-brand-gradient-end transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50"
+          >
+            <Plus className="w-4 h-4" /> Add offer
+          </button>
+        </div>
       </header>
 
       <SortableContext items={offers.map((o) => o.id)} strategy={rectSortingStrategy}>

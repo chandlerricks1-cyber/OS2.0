@@ -16,6 +16,136 @@ export interface GeneratedOffer {
 
 const VALID_TYPES = ['attraction', 'upsell', 'downsell', 'continuity'] as const
 
+const OFFER_TYPE_STRATEGIES: Record<string, string> = {
+  attraction: `Choose from these ATTRACTION strategies:
+1. **Win Your Money Back** — Customer pays, hits a goal, gets money back as cash or store credit.
+2. **Giveaways** — Advertise a grand prize. One person wins free. Everyone else gets a promotional discount.
+3. **Decoy Offer** — Advertise something free or deeply discounted. Present a premium version side-by-side.
+4. **Buy X Get Y Free** — Bundle multiple units and give extras free. "Buy 6 months, get 6 months free" beats "50% off."
+5. **Pay Less Now or Pay More Later** — Free trial with delayed billing, or discount for paying today. Gets card on file.`,
+  upsell: `Choose from these UPSELL strategies:
+1. **Classic Upsell** — "You can't have X without Y." Solve the next problem after the first purchase. BAMFAM.
+2. **Menu Upsell** — Unsell what they don't need, prescribe what they do, A/B choice (not yes/no), card on file.
+3. **Anchor Upsell** — Present the most expensive option first (5-10x main offer). Get "The Gasp."
+4. **Rollover Upsell** — Credit previous purchases toward the next offer. Price next offer at least 4x the credit amount.`,
+  downsell: `Choose from these DOWNSELL strategies (never drop the price for the same thing — downsells are trades, not discounts):
+1. **Payment Plan Downsells** — Same product, same price, spread over time.
+2. **Trial With Penalty** — Free trial with conditions. If they meet terms, it stays free. If not, they pay fees.
+3. **Feature Downsells** — Lower the price by removing features (not discounting the same thing).`,
+  continuity: `Choose from these CONTINUITY strategies:
+1. **Continuity Bonus Offers** — Give an awesome thing free if they sign up today. Focus marketing on the bonus.
+2. **Continuity Discount Offers** — Give free time if they commit. Bill in 4-week cycles (13/year vs 12 months).
+3. **Waived Fee Offers** — Month-to-month with a setup fee (3-5x monthly rate), OR waive the fee with a commitment.`,
+}
+
+function buildSingleOfferPrompt(
+  offerType: string,
+  metrics: Record<string, unknown>,
+  existingOfferNames: string[],
+  intakeContext: string
+): string {
+  return `You are a strategic offer architect. Generate ONE new "${offerType}" offer idea for this business.
+
+# MONEY MODEL CONTEXT
+
+A Money Model is a sequence of offers engineered to maximize gross profit in the first 30 days after acquiring a customer.
+- **Attraction Offer** — the entry point that converts a lead into a customer
+- **Upsell Offer** — a higher-value offer presented after the initial purchase
+- **Downsell Offer** — a lower-barrier alternative when the upsell is declined
+- **Continuity Offer** — an ongoing subscription that stabilizes monthly cash flow
+
+# VALUE EQUATION
+
+Value = (Dream Outcome × Perceived Likelihood of Achievement) / (Time Delay × Effort & Sacrifice)
+
+# RULES
+
+- Simple scales. Complex stalls.
+- Focus on the first 30 days of the customer journey.
+- Offer name must be descriptive — a stranger should understand what it is. No creative branding names.
+- Embed Grand Slam Offer principles: increase perceived likelihood, shorten time delay, increase dream outcome, decrease effort.
+${offerType === 'continuity' ? '- Continuity must be simple, sticky, solve an ongoing need, and logically extend from the initial transaction.' : ''}
+
+# STRATEGY CATALOG
+
+${OFFER_TYPE_STRATEGIES[offerType] ?? ''}
+
+# BUSINESS DATA
+
+- Business type: ${metrics.business_type ?? 'not specified'}
+- Industry: ${metrics.industry ?? 'not specified'}
+- Company: ${metrics.company_name ?? 'not specified'}
+- CAC: ${formatCurrency(metrics.cac as number | null)}
+- LTV: ${formatCurrency(metrics.ltv as number | null)}
+- Gross Profit per Customer: ${formatCurrency(metrics.gross_profit_per_customer as number | null)}
+- Cash Collected in First 30 Days: ${formatCurrency(metrics.cash_collected_first_30_days as number | null)}
+- Monthly Revenue: ${formatCurrency(metrics.monthly_revenue as number | null)}
+- Monthly New Customers: ${metrics.monthly_new_customers ?? 'unknown'}
+- Close Rate: ${formatPercent(metrics.close_rate as number | null)}
+- Current Offers: ${JSON.stringify(metrics.primary_offers ?? [])}
+
+INTAKE CONVERSATION (for context):
+${intakeContext}
+
+# EXISTING OFFERS TO AVOID DUPLICATING
+
+The business already has these offers: ${existingOfferNames.length > 0 ? existingOfferNames.join(', ') : 'none yet'}. Generate something DIFFERENT from these — use a different strategy or angle.
+
+# OUTPUT
+
+Return ONLY a single valid JSON object. No preamble. No explanation. No markdown code fences.
+
+{
+  "name": "<descriptive offer name>",
+  "offer_type": "${offerType}",
+  "price": "<pricing string>",
+  "what_customer_gets": "<specific deliverables>",
+  "why_do_it": "<value proposition / pain avoided>",
+  "when_offered": "<timing in customer journey>",
+  "trigger": "<what signals it's time to present this offer>",
+  "sales_pitch": "<talking points to sell it + how to present it>"
+}`
+}
+
+export async function generateSingleOffer(
+  offerType: string,
+  metrics: Record<string, unknown>,
+  existingOfferNames: string[],
+  intakeMessages: Array<{ role: string; content: string }>
+): Promise<GeneratedOffer> {
+  if (!VALID_TYPES.includes(offerType as typeof VALID_TYPES[number])) {
+    throw new Error(`Invalid offer_type: ${offerType}`)
+  }
+
+  const intakeContext = intakeMessages
+    .slice(-20)
+    .map((m) => `${m.role === 'user' ? 'Business Owner' : 'Analyst'}: ${m.content}`)
+    .join('\n\n')
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  const result = await model.generateContent(
+    buildSingleOfferPrompt(offerType, metrics, existingOfferNames, intakeContext)
+  )
+  const text = result.response.text()
+
+  let raw = text.trim()
+  const fenceMatch = raw.match(/^```(?:json)?\s*([\s\S]*?)```\s*$/)
+  if (fenceMatch) {
+    raw = fenceMatch[1].trim()
+  }
+
+  const offer = JSON.parse(raw) as GeneratedOffer
+
+  if (!offer.name || !offer.offer_type) {
+    throw new Error('Generated offer missing required fields')
+  }
+
+  // Force the correct type in case the model deviated
+  offer.offer_type = offerType as GeneratedOffer['offer_type']
+
+  return offer
+}
+
 function buildOfferPrompt(
   metrics: Record<string, unknown>,
   intakeContext: string
