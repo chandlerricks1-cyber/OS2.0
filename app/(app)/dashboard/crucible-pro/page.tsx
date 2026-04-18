@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CrucibleProShell } from '@/components/crucible-pro/CrucibleProShell'
+import { CrucibleProUpgrade } from '@/components/crucible-pro/CrucibleProUpgrade'
 import type {
   Appointment,
   CallRecording,
@@ -27,11 +28,16 @@ export default async function CrucibleProPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role')
+    .select('id, email, full_name, role, crucible_pro_status')
     .eq('id', user.id)
     .single()
 
   const isAdmin = profile?.role === 'admin'
+  const hasProAccess = isAdmin || profile?.crucible_pro_status === 'active'
+
+  if (!hasProAccess) {
+    return <CrucibleProUpgrade isPending={profile?.crucible_pro_status === 'pending'} />
+  }
 
   let clients: ClientOption[] = []
   let targetUserId = user.id

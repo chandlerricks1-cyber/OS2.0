@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X, Shield, Mic, Users, Plug } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 
@@ -58,12 +58,37 @@ function isActivePath(pathname: string, href: string) {
   return pathname.startsWith(href + '/')
 }
 
+const adminNavItems = [
+  {
+    href: '/dashboard/admin',
+    label: 'Admin Dashboard',
+    icon: <Shield className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+    exact: true,
+  },
+  {
+    href: '/dashboard/admin/podcast',
+    label: 'Podcast Leads',
+    icon: <Mic className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
+    href: '/dashboard/admin/clients',
+    label: 'Clients',
+    icon: <Users className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
+    href: '/dashboard/admin/integrations',
+    label: 'Integrations',
+    icon: <Plug className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+]
+
 interface SidebarProps {
   mobileOpen?: boolean
   onMobileClose?: () => void
+  role?: string
 }
 
-export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
+export function Sidebar({ mobileOpen = false, onMobileClose, role }: SidebarProps) {
   const pathname = usePathname()
   const { collapsed, toggle } = useSidebarCollapsed()
 
@@ -150,6 +175,39 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             )
           })}
         </nav>
+
+        {role === 'admin' && (
+          <div className={`border-t border-white/10 py-3 space-y-0.5 ${collapsed ? 'md:px-2 px-3' : 'px-3'}`}>
+            {!collapsed && (
+              <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider px-3 mb-2">Admin</p>
+            )}
+            {adminNavItems.map((item) => {
+              const isActive = item.exact
+                ? pathname === item.href
+                : isActivePath(pathname, item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onMobileClose}
+                  title={collapsed ? item.label : undefined}
+                  className={`relative flex items-center rounded-lg text-sm font-medium transition-all gap-3 px-3 py-2.5
+                    ${collapsed ? 'md:justify-center md:px-0 md:py-3 md:gap-0' : ''}
+                    ${isActive
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                    }`}
+                >
+                  {isActive && !collapsed && (
+                    <span className="absolute left-0 w-0.5 h-5 bg-brand-orange rounded-full" />
+                  )}
+                  <span className={isActive ? 'text-brand-orange' : ''}>{item.icon}</span>
+                  <span className={collapsed ? 'md:hidden' : ''}>{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
 
         <div className={`px-3 pb-2 ${collapsed ? 'md:px-2' : ''}`}>
           <Link

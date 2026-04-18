@@ -380,6 +380,8 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          crucible_pro_granted_at: string | null
+          crucible_pro_status: string | null
           email: string
           full_name: string | null
           id: string
@@ -389,6 +391,8 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          crucible_pro_granted_at?: string | null
+          crucible_pro_status?: string | null
           email: string
           full_name?: string | null
           id: string
@@ -398,6 +402,8 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          crucible_pro_granted_at?: string | null
+          crucible_pro_status?: string | null
           email?: string
           full_name?: string | null
           id?: string

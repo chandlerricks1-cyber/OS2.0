@@ -14,7 +14,7 @@ export function LeadDeleteButton({ leadId, leadName }: { leadId: string; leadNam
     try {
       const res = await fetch(`/api/admin/podcast/${leadId}`, { method: 'DELETE' })
       if (res.ok) {
-        router.push('/admin/podcast')
+        router.push('/dashboard/admin/podcast')
         router.refresh()
       }
     } finally {

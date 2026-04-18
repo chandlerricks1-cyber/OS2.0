@@ -142,7 +142,7 @@ export function PodcastLeadsTable({ leads }: { leads: Lead[] }) {
           return (
             <Link
               key={lead.id}
-              href={`/admin/podcast/${lead.id}`}
+              href={`/dashboard/admin/podcast/${lead.id}`}
               className="block bg-white rounded-2xl border border-gray-200 p-4 active:bg-gray-50"
             >
               <div className="flex items-start justify-between gap-3 mb-2">
@@ -261,7 +261,7 @@ export function PodcastLeadsTable({ leads }: { leads: Lead[] }) {
                       {new Date(lead.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/podcast/${lead.id}`} className="text-brand-gradient-end hover:underline text-xs font-medium">
+                      <Link href={`/dashboard/admin/podcast/${lead.id}`} className="text-brand-gradient-end hover:underline text-xs font-medium">
                         View
                       </Link>
                     </td>

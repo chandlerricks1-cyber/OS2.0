@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Admin routes require admin role
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard/admin')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

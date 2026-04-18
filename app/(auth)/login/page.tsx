@@ -33,7 +33,7 @@ export default function LoginPage() {
       .eq('id', data.user.id)
       .single()
 
-    router.push(profile?.role === 'admin' ? '/admin' : '/intake')
+    router.push(profile?.role === 'admin' ? '/dashboard/admin' : '/intake')
     router.refresh()
   }
 
