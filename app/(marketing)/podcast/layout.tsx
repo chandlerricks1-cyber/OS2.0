@@ -10,7 +10,7 @@ export const metadata: Metadata = {
       'Find out how to make more money per customer, lower the cost to acquire them, and unlock permission to scale your business.',
     images: [
       {
-        url: 'https://i.ibb.co/N2c4XGF0/Podcast-Hero-Section.png',
+        url: 'https://i.ibb.co/JR4jc3kp/Crucible-Podcast-Open-Graph-Image.png',
         alt: 'The Crucible Podcast - Solve your biggest growth constraint',
       },
     ],
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'Crucible Podcast - Book your episode to solve your biggest bottleneck!',
     description:
       'Find out how to make more money per customer, lower the cost to acquire them, and unlock permission to scale your business.',
-    images: ['https://i.ibb.co/N2c4XGF0/Podcast-Hero-Section.png'],
+    images: ['https://i.ibb.co/JR4jc3kp/Crucible-Podcast-Open-Graph-Image.png'],
   },
 }
 
