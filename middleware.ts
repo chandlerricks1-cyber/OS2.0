@@ -44,8 +44,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Redirect old /admin routes to new /dashboard/admin
+  if (pathname.startsWith('/admin')) {
+    const newPath = pathname.replace(/^\/admin/, '/dashboard/admin')
+    return NextResponse.redirect(new URL(newPath, request.url))
+  }
+
   // Admin routes require admin role
-  if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard/admin')) {
+  if (pathname.startsWith('/dashboard/admin')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

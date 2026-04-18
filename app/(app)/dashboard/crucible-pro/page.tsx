@@ -47,6 +47,7 @@ export default async function CrucibleProPage({
       .from('profiles')
       .select('id, email, full_name')
       .eq('role', 'client')
+      .eq('crucible_pro_status', 'active')
       .order('full_name', { ascending: true, nullsFirst: false })
       .order('email')
     clients = (list as ClientOption[] | null) ?? []
