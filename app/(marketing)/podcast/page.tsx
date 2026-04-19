@@ -407,7 +407,9 @@ export default function PodcastPage() {
             </div>
 
             {errors.form && (
-              <p className="text-red-400 text-sm mt-4 text-center">{errors.form}</p>
+              <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-5 py-4 mt-4 text-center">
+                <p className="text-red-400 text-sm">{errors.form}</p>
+              </div>
             )}
 
             <button

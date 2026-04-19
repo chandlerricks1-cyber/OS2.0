@@ -109,10 +109,10 @@ export async function POST(request: Request) {
     if (!phone?.trim()) errors.phone = 'Phone number is required'
     if (!preferred_date) errors.preferred_date = 'Preferred date is required'
     else {
-      const date = new Date(preferred_date)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      if (isNaN(date.getTime()) || date < today) {
+      // Compare as date strings (YYYY-MM-DD) to avoid timezone mismatches
+      const dateStr = preferred_date.slice(0, 10)
+      const todayStr = new Date().toISOString().slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || dateStr < todayStr) {
         errors.preferred_date = 'Please select a future date'
       }
     }
@@ -130,15 +130,41 @@ export async function POST(request: Request) {
       preferred_date,
     }
 
-    const { data, error } = await supabase
+    // Check for existing lead with same email to prevent duplicates
+    const { data: existingLead } = await supabase
       .from('podcast_leads')
-      .insert(cleanLead)
-      .select('id')
-      .single()
+      .select('id, status')
+      .eq('email', cleanLead.email)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-    if (error) {
-      console.error('Failed to insert podcast lead:', error)
-      return NextResponse.json({ error: 'Failed to save. Please try again.' }, { status: 500 })
+    let data: { id: string }
+
+    if (existingLead && existingLead.status === 'new') {
+      // Update existing lead instead of creating a duplicate
+      await supabase
+        .from('podcast_leads')
+        .update({
+          full_name: cleanLead.full_name,
+          phone: cleanLead.phone,
+          preferred_date: cleanLead.preferred_date,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingLead.id)
+      data = { id: existingLead.id }
+    } else {
+      const { data: newLead, error } = await supabase
+        .from('podcast_leads')
+        .insert(cleanLead)
+        .select('id')
+        .single()
+
+      if (error) {
+        console.error('Failed to insert podcast lead:', error)
+        return NextResponse.json({ error: 'Failed to save. Please try again.' }, { status: 500 })
+      }
+      data = newLead
     }
 
     const auth = await createAccountAndSignIn(supabase, cleanLead)
@@ -167,10 +193,21 @@ export async function POST(request: Request) {
           console.warn('[ghl] failed to persist GHL ids on podcast_leads:', updateErr.message)
         }
       }
+      // Propagate ghl_contact_id to profiles for Crucible Pro appointment sync
+      if (ghl.contactId && auth.userId) {
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ ghl_contact_id: ghl.contactId })
+          .eq('id', auth.userId)
+        if (profileErr) {
+          console.warn('[ghl] failed to set ghl_contact_id on profiles:', profileErr.message)
+        }
+      }
     }
 
     return NextResponse.json({ id: data.id }, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  } catch (err) {
+    console.error('Podcast lead error:', err)
+    return NextResponse.json({ error: 'Something went wrong on our end. Please try again.' }, { status: 500 })
   }
 }

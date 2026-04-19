@@ -53,7 +53,7 @@ function formatIntakeNote(answers: Record<string, string | null | undefined>): s
 async function pushIntakeToGhl(params: {
   lead: { full_name: string; email: string; phone: string | null; ghl_contact_id: string | null; ghl_opportunity_id: string | null; preferred_date: string | null }
   answers: Record<string, string | null | undefined>
-}): Promise<{ error?: string; opportunityId?: string }> {
+}): Promise<{ error?: string; opportunityId?: string; contactId?: string }> {
   if (!isGhlConfigured()) return { error: 'GHL not configured' }
   try {
     const pipeline = await getPodcastPipeline()
@@ -99,7 +99,7 @@ async function pushIntakeToGhl(params: {
       }
     }
 
-    return { opportunityId: opportunityId ?? undefined }
+    return { opportunityId: opportunityId ?? undefined, contactId: contactId ?? undefined }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'GHL push failed' }
   }
@@ -137,7 +137,19 @@ export async function POST(request: Request) {
       .single()
 
     if (!lead) {
-      return NextResponse.json({ error: 'Invalid lead reference. Please start from the podcast page.' }, { status: 400 })
+      return NextResponse.json({ error: 'We couldn\'t find your booking. Please go back to the podcast page and book your episode again.' }, { status: 400 })
+    }
+
+    // Check if intake already submitted for this lead
+    const { data: existingIntake } = await supabase
+      .from('podcast_intake')
+      .select('id')
+      .eq('lead_id', lead_id)
+      .maybeSingle()
+
+    if (existingIntake) {
+      // Already submitted — treat as success so the user isn't stuck
+      return NextResponse.json({ success: true }, { status: 201 })
     }
 
     // Insert intake answers
@@ -202,10 +214,22 @@ export async function POST(request: Request) {
           .update({ ghl_opportunity_id: ghl.opportunityId })
           .eq('id', lead_id)
       }
+      // Propagate ghl_contact_id to profiles for Crucible Pro appointment sync
+      const effectiveContactId = ghl.contactId || lead.ghl_contact_id
+      if (effectiveContactId) {
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ ghl_contact_id: effectiveContactId })
+          .eq('email', lead.email)
+        if (profileErr) {
+          console.warn('[ghl] failed to set ghl_contact_id on profiles:', profileErr.message)
+        }
+      }
     }
 
     return NextResponse.json({ success: true }, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  } catch (err) {
+    console.error('Podcast intake error:', err)
+    return NextResponse.json({ error: 'Something went wrong on our end. Please try again.' }, { status: 500 })
   }
 }

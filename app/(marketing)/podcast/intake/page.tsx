@@ -119,7 +119,7 @@ function PodcastIntakeContent() {
         return
       }
 
-      router.push('/dashboard')
+      router.push('/podcast/thank-you')
     } catch {
       setErrors({ form: 'Something went wrong. Please try again.' })
     } finally {
@@ -364,7 +364,11 @@ function PodcastIntakeContent() {
         </div>
 
         {/* Submit */}
-        {errors.form && <p className="text-red-400 text-sm mb-4 text-center">{errors.form}</p>}
+        {errors.form && (
+          <div className={`rounded-xl border border-red-400/30 bg-red-400/10 px-5 py-4 mb-6 text-center`}>
+            <p className="text-red-400 text-sm">{errors.form}</p>
+          </div>
+        )}
         <button type="submit" disabled={submitting} className="btn-gradient !flex w-full h-14 items-center justify-center gap-2 text-base disabled:opacity-60 disabled:cursor-not-allowed">
           {submitting ? 'Submitting...' : (<>Submit Questionnaire <ArrowRight className="w-4 h-4" /></>)}
         </button>
