@@ -1,4 +1,5 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import {
   createOpportunity,
@@ -8,13 +9,13 @@ import {
   upsertContact,
 } from '@/lib/ghl/client'
 
-async function createAccountAndSignIn(admin: Awaited<ReturnType<typeof createAdminClient>>, lead: {
+async function createAccountAndSignIn(lead: {
   full_name: string
   email: string
   phone: string
 }): Promise<{ userId?: string; error?: string }> {
   try {
-    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email: lead.email,
       email_confirm: true,
       user_metadata: { full_name: lead.full_name, phone: lead.phone },
@@ -27,7 +28,7 @@ async function createAccountAndSignIn(admin: Awaited<ReturnType<typeof createAdm
       if (!alreadyExists) return { error: createErr.message }
     }
 
-    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+    const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: lead.email,
     })
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Validation failed', fields: errors }, { status: 400 })
     }
 
-    const supabase = await createAdminClient()
+    const supabase = supabaseAdmin
 
     const cleanLead = {
       full_name: full_name.trim(),
@@ -167,7 +168,7 @@ export async function POST(request: Request) {
       data = newLead
     }
 
-    const auth = await createAccountAndSignIn(supabase, cleanLead)
+    const auth = await createAccountAndSignIn(cleanLead)
     if (auth.error) {
       console.warn('[podcast-lead] auto account creation failed:', auth.error)
     }

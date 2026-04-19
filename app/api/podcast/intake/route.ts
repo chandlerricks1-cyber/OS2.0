@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import {
   addContactNote,
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Validation failed', fields: errors }, { status: 400 })
     }
 
-    const supabase = await createAdminClient()
+    const supabase = supabaseAdmin
 
     // Verify the lead exists
     const { data: lead } = await supabase
