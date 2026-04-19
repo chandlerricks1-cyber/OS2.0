@@ -27,7 +27,7 @@ export default async function AdminClientsPage() {
       intake_sessions(status, completed_at),
       subscriptions(status, plan_type),
       business_metrics(cac, ltv, cac_payback_months),
-      client_tags(tag)
+      client_tags!client_tags_user_id_fkey(tag)
     `)
     .eq('role', 'client')
     .order('created_at', { ascending: false })

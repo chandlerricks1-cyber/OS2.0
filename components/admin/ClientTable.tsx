@@ -11,10 +11,10 @@ interface Client {
   full_name: string | null
   created_at: string
   crucible_pro_status?: string | null
-  intake_sessions: Array<{ status: string; completed_at: string | null }> | null
-  subscriptions: Array<{ status: string; plan_type: string | null }> | null
-  business_metrics: Array<{ cac: number | null; ltv: number | null; cac_payback_months: number | null }> | null
-  client_tags: Array<{ tag: string }> | null
+  intake_sessions: { status: string; completed_at: string | null } | null
+  subscriptions: { status: string; plan_type: string | null } | null
+  business_metrics: { cac: number | null; ltv: number | null; cac_payback_months: number | null } | null
+  client_tags: Array<{ tag: string }>
 }
 
 interface ClientTableProps {
@@ -141,8 +141,8 @@ export function ClientTable({ clients }: ClientTableProps) {
           {/* Mobile card view */}
           <div className="md:hidden space-y-3">
             {filtered.map((client) => {
-              const session = client.intake_sessions?.[0]
-              const metrics = client.business_metrics?.[0]
+              const session = client.intake_sessions
+              const metrics = client.business_metrics
               const tags = client.client_tags ?? []
               return (
                 <div
@@ -211,9 +211,9 @@ export function ClientTable({ clients }: ClientTableProps) {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.map((client) => {
-                const session = client.intake_sessions?.[0]
-                const subscription = client.subscriptions?.[0]
-                const metrics = client.business_metrics?.[0]
+                const session = client.intake_sessions
+                const subscription = client.subscriptions
+                const metrics = client.business_metrics
                 const tags = client.client_tags ?? []
 
                 return (

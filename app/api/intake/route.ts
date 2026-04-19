@@ -4,6 +4,7 @@ import { streamIntakeResponse, parseIntakeCompletion } from '@/lib/claude/intake
 import { calculateDerivedMetrics } from '@/lib/utils/metrics'
 import { generateCrucibleOffers } from '@/lib/claude/offers'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { aiRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -16,6 +17,10 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // ── Rate limit ────────────────────────────────────────────────────────
+  const rateLimitResponse = await checkRateLimit(user.id, aiRatelimit)
+  if (rateLimitResponse) return rateLimitResponse
 
   // ── Bug Fix 3: Pre-flight validation before any streaming ─────────────
   if (!process.env.GEMINI_API_KEY) {
@@ -135,7 +140,7 @@ export async function POST(req: NextRequest) {
             extraction_confidence: extracted.extraction_confidence ?? null,
             raw_extraction: extracted as Record<string, unknown>,
             updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' })
+          } as never, { onConflict: 'user_id' })
 
           if (upsertError) {
             // Log but don't abort — messages are already saved

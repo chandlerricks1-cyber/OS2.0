@@ -23,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const body = await request.json()
     const { full_name, email, phone, preferred_date } = body
 
-    const updates: Record<string, string> = { updated_at: new Date().toISOString() }
+    const updates: { updated_at: string; full_name?: string; email?: string; phone?: string; preferred_date?: string } = { updated_at: new Date().toISOString() }
     if (full_name !== undefined) updates.full_name = full_name.trim()
     if (email !== undefined) updates.email = email.trim().toLowerCase()
     if (phone !== undefined) updates.phone = phone.trim()

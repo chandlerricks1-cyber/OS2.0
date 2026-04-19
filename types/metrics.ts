@@ -1,3 +1,5 @@
+import type { Json } from './database'
+
 export interface BusinessMetrics {
   id: string
   user_id: string
@@ -18,8 +20,10 @@ export interface BusinessMetrics {
   close_rate: number | null
   cac_payback_months: number | null
   required_30_day_revenue: number | null
-  extraction_confidence: Record<string, number> | null
-  raw_extraction: Record<string, unknown> | null
+  extraction_confidence: Record<string, number> | Json | null
+  raw_extraction: Record<string, unknown> | Json | null
+  primary_offers: Json | null
+  cro_blockers: Json | null
   updated_at: string
 }
 

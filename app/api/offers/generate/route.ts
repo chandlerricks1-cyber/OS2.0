@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateSingleOffer } from '@/lib/claude/offers'
+import { aiRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 const VALID_TYPES = ['attraction', 'upsell', 'downsell', 'continuity'] as const
 
@@ -8,6 +9,10 @@ export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Rate limit AI generation
+  const rateLimitResponse = await checkRateLimit(user.id, aiRatelimit)
+  if (rateLimitResponse) return rateLimitResponse
 
   const body = await request.json().catch(() => ({}))
   const offerType: string = body.offer_type ?? ''
