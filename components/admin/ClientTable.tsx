@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatMonths } from '@/lib/utils/metrics'
 import { grantCrucibleProAccess, revokeCrucibleProAccess } from '@/lib/actions'
@@ -39,6 +40,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function InlineProToggle({ userId, status }: { userId: string; status: string | null | undefined }) {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   if (status === 'active') {
     return (
@@ -49,7 +51,10 @@ function InlineProToggle({ userId, status }: { userId: string; status: string | 
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            startTransition(() => revokeCrucibleProAccess(userId))
+            startTransition(async () => {
+              await revokeCrucibleProAccess(userId)
+              router.refresh()
+            })
           }}
           className="text-[10px] text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
         >
@@ -71,7 +76,10 @@ function InlineProToggle({ userId, status }: { userId: string; status: string | 
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          startTransition(() => grantCrucibleProAccess(userId))
+          startTransition(async () => {
+            await grantCrucibleProAccess(userId)
+            router.refresh()
+          })
         }}
         className="text-[10px] font-medium text-brand-gradient-end hover:underline disabled:opacity-50"
       >

@@ -11,12 +11,14 @@ export function AppointmentsTab({
   tasks,
   teamMembers,
   targetUserId,
+  clientName,
   isAdmin,
 }: {
   appointments: Appointment[]
   tasks: Task[]
   teamMembers: TeamMember[]
   targetUserId: string
+  clientName: string
   isAdmin: boolean
 }) {
   const upcoming = appointments
@@ -26,7 +28,7 @@ export function AppointmentsTab({
   return (
     <div className="space-y-6">
       <UpcomingCard appointment={upcoming} targetUserId={targetUserId} isAdmin={isAdmin} />
-      <TaskListCard tasks={tasks} teamMembers={teamMembers} targetUserId={targetUserId} isAdmin={isAdmin} />
+      <TaskListCard tasks={tasks} teamMembers={teamMembers} targetUserId={targetUserId} clientName={clientName} isAdmin={isAdmin} />
       <CompletedTasksCard tasks={tasks} />
     </div>
   )
@@ -235,44 +237,69 @@ function EditAppointmentForm({
   )
 }
 
+type AccountableType = 'client' | 'crucible' | 'team' | 'custom' | ''
+
 function TaskListCard({
   tasks,
   teamMembers,
   targetUserId,
+  clientName,
   isAdmin,
 }: {
   tasks: Task[]
   teamMembers: TeamMember[]
   targetUserId: string
+  clientName: string
   isAdmin: boolean
 }) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
   const [title, setTitle] = useState('')
+  const [accountableType, setAccountableType] = useState<AccountableType>('')
   const [memberId, setMemberId] = useState<string>('')
+  const [customName, setCustomName] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function resolveAccountable(): { id: string | null; name: string | null } {
+    switch (accountableType) {
+      case 'client':
+        return { id: null, name: clientName }
+      case 'crucible':
+        return { id: null, name: 'Crucible' }
+      case 'team': {
+        const member = teamMembers.find((m) => m.id === memberId)
+        return { id: member?.id ?? null, name: member?.name ?? null }
+      }
+      case 'custom':
+        return { id: null, name: customName.trim() || null }
+      default:
+        return { id: null, name: null }
+    }
+  }
 
   async function createTask() {
     if (!title.trim()) return
     setSaving(true)
     setError(null)
     try {
-      const member = teamMembers.find((m) => m.id === memberId)
+      const { id, name } = resolveAccountable()
       const res = await fetch('/api/crucible-pro/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: isAdmin ? targetUserId : undefined,
           title: title.trim(),
-          accountable_team_member_id: member?.id ?? null,
-          accountable_name: member?.name ?? null,
+          accountable_team_member_id: id,
+          accountable_name: name,
         }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Failed to create task')
       setTitle('')
+      setAccountableType('')
       setMemberId('')
+      setCustomName('')
       setCreating(false)
       router.refresh()
     } catch (e) {
@@ -299,6 +326,10 @@ function TaskListCard({
 
   const active = tasks.filter((t) => t.status !== 'done')
 
+  const pillBase = 'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors'
+  const pillActive = 'border-brand-orange bg-brand-orange text-white'
+  const pillInactive = 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+
   return (
     <div className="bg-white border border-gray-200 rounded-[25px] p-6">
       <div className="flex items-center justify-between">
@@ -313,7 +344,7 @@ function TaskListCard({
       </div>
 
       {creating && (
-        <div className="mt-4 space-y-2 border border-gray-200 rounded-xl p-4 bg-gray-50">
+        <div className="mt-4 space-y-3 border border-gray-200 rounded-xl p-4 bg-gray-50">
           <input
             autoFocus
             value={title}
@@ -321,19 +352,68 @@ function TaskListCard({
             placeholder="What needs to happen?"
             className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
           />
-          <select
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-            className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white"
-          >
-            <option value="">Accountable — unassigned</option>
-            {teamMembers.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-                {m.position ? ` — ${m.position}` : ''}
-              </option>
-            ))}
-          </select>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1.5 block">Who is accountable?</label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => { setAccountableType('client'); setMemberId(''); setCustomName('') }}
+                className={`${pillBase} ${accountableType === 'client' ? pillActive : pillInactive}`}
+              >
+                {clientName}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAccountableType('crucible'); setMemberId(''); setCustomName('') }}
+                className={`${pillBase} ${accountableType === 'crucible' ? pillActive : pillInactive}`}
+              >
+                Crucible
+              </button>
+              {teamMembers.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setAccountableType('team'); setCustomName('') }}
+                  className={`${pillBase} ${accountableType === 'team' ? pillActive : pillInactive}`}
+                >
+                  Team Member
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => { setAccountableType('custom'); setMemberId('') }}
+                className={`${pillBase} ${accountableType === 'custom' ? pillActive : pillInactive}`}
+              >
+                Custom
+              </button>
+            </div>
+          </div>
+
+          {accountableType === 'team' && (
+            <select
+              value={memberId}
+              onChange={(e) => setMemberId(e.target.value)}
+              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white"
+            >
+              <option value="">Select team member…</option>
+              {teamMembers.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                  {m.position ? ` — ${m.position}` : ''}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {accountableType === 'custom' && (
+            <input
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="Enter name…"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
+            />
+          )}
+
           {error && <p className="text-xs text-red-600">{error}</p>}
           <button
             onClick={createTask}
@@ -349,34 +429,43 @@ function TaskListCard({
         <p className="mt-4 text-sm text-gray-500">No active tasks. Coaching calls generate tasks that land here.</p>
       )}
 
-      <ul className="mt-4 divide-y divide-gray-100">
+      <div className="mt-4 space-y-2">
         {active.map((t) => (
-          <li key={t.id} className="py-3 flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-gray-900 break-words">{t.title}</div>
-              {t.accountable_name && (
-                <div className="text-xs text-gray-500 mt-0.5">Accountable: {t.accountable_name}</div>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={t.status}
-                onChange={(e) => updateStatus(t.id, e.target.value as TaskStatus)}
-                className="text-xs font-medium px-2 py-1 rounded-md border border-gray-200 bg-white"
-              >
-                {TASK_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {TASK_STATUS_LABELS[s]}
-                  </option>
-                ))}
-              </select>
-              <button onClick={() => remove(t.id)} className="text-gray-400 hover:text-red-500">
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </li>
+          <div
+            key={t.id}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span
+              className="flex-1 min-w-0 text-sm font-medium text-gray-900 truncate"
+              title={t.title}
+            >
+              {t.title}
+            </span>
+            {t.accountable_name && (
+              <span className="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-medium">
+                {t.accountable_name}
+              </span>
+            )}
+            <span className="shrink-0 text-xs text-gray-400 tabular-nums">
+              {new Date(t.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </span>
+            <select
+              value={t.status}
+              onChange={(e) => updateStatus(t.id, e.target.value as TaskStatus)}
+              className="shrink-0 text-xs font-medium px-2 py-1 rounded-full border border-gray-200 bg-white"
+            >
+              {TASK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {TASK_STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => remove(t.id)} className="shrink-0 text-gray-400 hover:text-red-500">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
@@ -390,16 +479,31 @@ function CompletedTasksCard({ tasks }: { tasks: Task[] }) {
       {completed.length === 0 ? (
         <p className="mt-4 text-sm text-gray-500">Completed tasks show up here as you close them.</p>
       ) : (
-        <ul className="mt-4 divide-y divide-gray-100">
+        <div className="mt-4 space-y-2">
           {completed.map((t) => (
-            <li key={t.id} className="py-2 flex items-center justify-between">
-              <span className="text-sm text-gray-900 line-through decoration-gray-300">{t.title}</span>
-              <span className="text-xs text-gray-400">
-                {t.completed_at ? new Date(t.completed_at).toLocaleDateString() : ''}
+            <div
+              key={t.id}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-full border border-gray-100 bg-gray-50/50"
+            >
+              <span
+                className="flex-1 min-w-0 text-sm text-gray-400 line-through decoration-gray-300 truncate"
+                title={t.title}
+              >
+                {t.title}
               </span>
-            </li>
+              {t.accountable_name && (
+                <span className="hidden sm:inline-flex shrink-0 px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 text-xs font-medium">
+                  {t.accountable_name}
+                </span>
+              )}
+              <span className="shrink-0 text-xs text-gray-400 tabular-nums">
+                {t.completed_at
+                  ? new Date(t.completed_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                  : new Date(t.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </span>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

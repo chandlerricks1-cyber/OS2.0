@@ -6,6 +6,7 @@ import { LeadStatusControl } from '@/components/admin/LeadStatusControl'
 import { LeadEditForm } from '@/components/admin/LeadEditForm'
 import { LeadDeleteButton } from '@/components/admin/LeadDeleteButton'
 import { LeadTagManager } from '@/components/admin/LeadTagManager'
+import { ConvertToClientButton } from '@/components/admin/ConvertToClientButton'
 
 export default async function AdminPodcastDetailPage({
   params,
@@ -48,6 +49,13 @@ export default async function AdminPodcastDetailPage({
     .order('created_at', { ascending: true })
 
   const tagList = tags?.map((t) => t.tag) ?? []
+
+  // Check if lead has already been converted to a client
+  const { data: existingClient } = await adminSupabase
+    .from('profiles')
+    .select('id')
+    .eq('email', lead.email)
+    .single()
 
   return (
     <div>
@@ -98,6 +106,28 @@ export default async function AdminPodcastDetailPage({
             <span className="text-xs font-medium text-gray-500">Tags</span>
           </div>
           <LeadTagManager leadId={lead.id} tags={tagList} />
+        </div>
+
+        {/* Convert to Client */}
+        <div className="mt-5 pt-5 border-t border-gray-100">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-xs font-medium text-gray-500">Client Account</span>
+          </div>
+          {existingClient ? (
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                Converted
+              </span>
+              <Link
+                href={`/dashboard/admin/clients/${existingClient.id}`}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                View Client Profile &rarr;
+              </Link>
+            </div>
+          ) : (
+            <ConvertToClientButton leadId={lead.id} leadName={lead.full_name} leadEmail={lead.email} />
+          )}
         </div>
       </div>
 

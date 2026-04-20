@@ -12,7 +12,7 @@ Crucible OS is the web app + dashboard that supports this business — marketing
 
 ## 2. Target Customer
 
-- Pest control company owners, $1M–$15M ARR
+- Business owners, $1M–$15M ARR
 - Operationally capable but growth-stagnant or margin-misaligned
 - ~400-contact Apollo.io outreach list of pest control owners built
 - Small-business owners — vocabulary and UX should match that audience, not enterprise buyers

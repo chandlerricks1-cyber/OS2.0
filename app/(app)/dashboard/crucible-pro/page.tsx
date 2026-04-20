@@ -107,6 +107,15 @@ export default async function CrucibleProPage({
       .maybeSingle(),
   ])
 
+  // Resolve client display name for accountability assignment
+  let clientName = 'Client'
+  if (isAdmin) {
+    const match = clients.find((c) => c.id === targetUserId)
+    clientName = match?.full_name ?? match?.email ?? 'Client'
+  } else {
+    clientName = profile?.full_name ?? profile?.email ?? 'Client'
+  }
+
   const revenueGoal = extractRevenueGoal(metrics)
 
   const billing: BillingSnapshot = {
@@ -128,6 +137,7 @@ export default async function CrucibleProPage({
       isAdmin={isAdmin}
       clients={clients}
       targetUserId={targetUserId}
+      clientName={clientName}
       initialTab={initialTab}
       appointments={(appointments as Appointment[] | null) ?? []}
       recordings={(recordings as CallRecording[] | null) ?? []}

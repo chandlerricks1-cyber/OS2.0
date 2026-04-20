@@ -34,6 +34,7 @@ export function CrucibleProShell({
   isAdmin,
   clients,
   targetUserId,
+  clientName,
   initialTab,
   appointments,
   recordings,
@@ -46,6 +47,7 @@ export function CrucibleProShell({
   isAdmin: boolean
   clients: ClientOption[]
   targetUserId: string
+  clientName: string
   initialTab: TabId
   appointments: Appointment[]
   recordings: CallRecording[]
@@ -122,6 +124,7 @@ export function CrucibleProShell({
           tasks={tasks}
           teamMembers={teamMembers}
           targetUserId={targetUserId}
+          clientName={clientName}
           isAdmin={isAdmin}
         />
       )}

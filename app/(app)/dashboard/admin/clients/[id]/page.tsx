@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { formatCurrency, formatMonths, formatPercent } from '@/lib/utils/metrics'
 import Link from 'next/link'
 import { GrantProButton } from '@/components/admin/GrantProButton'
+import { ClientDeleteButton } from '@/components/admin/ClientDeleteButton'
 
 export default async function ClientDetailPage({
   params,
@@ -58,6 +59,9 @@ export default async function ClientDetailPage({
           {profile.full_name ?? profile.email}
         </h1>
         <p className="text-sm text-gray-500">{profile.email}</p>
+        <div className="mt-3">
+          <ClientDeleteButton userId={profile.id} clientName={profile.full_name ?? profile.email} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
