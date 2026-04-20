@@ -45,9 +45,8 @@ export default async function CrucibleProPage({
   if (isAdmin) {
     const { data: list } = await supabase
       .from('profiles')
-      .select('id, email, full_name')
+      .select('id, email, full_name, crucible_pro_status')
       .eq('role', 'client')
-      .eq('crucible_pro_status', 'active')
       .order('full_name', { ascending: true, nullsFirst: false })
       .order('email')
     clients = (list as ClientOption[] | null) ?? []
@@ -95,7 +94,7 @@ export default async function CrucibleProPage({
       .order('created_at', { ascending: false }),
     supabase
       .from('business_metrics')
-      .select('monthly_revenue, required_30_day_revenue, raw_extraction')
+      .select('monthly_revenue, required_30_day_revenue, revenue_goal_1yr, raw_extraction')
       .eq('user_id', targetUserId)
       .maybeSingle(),
     supabase
@@ -153,6 +152,9 @@ export default async function CrucibleProPage({
 function extractRevenueGoal(metrics: unknown): number | null {
   if (!metrics || typeof metrics !== 'object') return null
   const m = metrics as Record<string, unknown>
+  // Explicit override takes priority
+  if (typeof m.revenue_goal_1yr === 'number') return m.revenue_goal_1yr
+  // Fallback to intake-derived values
   if (typeof m.required_30_day_revenue === 'number') {
     return m.required_30_day_revenue * 12
   }

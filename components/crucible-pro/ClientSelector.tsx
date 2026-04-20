@@ -22,6 +22,7 @@ export function ClientSelector({
         {clients.map((c) => (
           <option key={c.id} value={c.id}>
             {c.full_name ? `${c.full_name} — ${c.email}` : c.email}
+            {c.crucible_pro_status === 'active' ? ' ★ Pro' : ''}
           </option>
         ))}
       </select>

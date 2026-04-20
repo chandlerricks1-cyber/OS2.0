@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -18,8 +18,7 @@ export async function addClientTag(userId: string, tag: string) {
 
   if (profile?.role !== 'admin') throw new Error('Forbidden')
 
-  const adminSupabase = await createAdminClient()
-  await adminSupabase.from('client_tags').insert({
+  await supabaseAdmin.from('client_tags').insert({
     user_id: userId,
     tag: tag.trim(),
     created_by: user.id,
@@ -41,8 +40,7 @@ export async function removeClientTag(userId: string, tag: string) {
 
   if (profile?.role !== 'admin') throw new Error('Forbidden')
 
-  const adminSupabase = await createAdminClient()
-  await adminSupabase
+  await supabaseAdmin
     .from('client_tags')
     .delete()
     .eq('user_id', userId)
@@ -90,8 +88,7 @@ export async function grantCrucibleProAccess(userId: string) {
 
   if (profile?.role !== 'admin') throw new Error('Forbidden')
 
-  const adminSupabase = await createAdminClient()
-  await adminSupabase
+  const { error } = await supabaseAdmin
     .from('profiles')
     .update({
       crucible_pro_status: 'active',
@@ -100,9 +97,12 @@ export async function grantCrucibleProAccess(userId: string) {
     })
     .eq('id', userId)
 
+  if (error) throw new Error(`Failed to grant access: ${error.message}`)
+
   revalidatePath(`/dashboard/admin/clients/${userId}`)
   revalidatePath('/dashboard/admin/clients')
   revalidatePath('/dashboard/admin')
+  revalidatePath('/dashboard/crucible-pro')
 }
 
 export async function convertLeadToClient(leadId: string) {
@@ -118,10 +118,8 @@ export async function convertLeadToClient(leadId: string) {
 
   if (profile?.role !== 'admin') throw new Error('Forbidden')
 
-  const adminSupabase = await createAdminClient()
-
   // Fetch the podcast lead
-  const { data: lead, error: leadError } = await adminSupabase
+  const { data: lead, error: leadError } = await supabaseAdmin
     .from('podcast_leads')
     .select('*')
     .eq('id', leadId)
@@ -130,7 +128,7 @@ export async function convertLeadToClient(leadId: string) {
   if (leadError || !lead) return { error: 'Podcast lead not found' }
 
   // Check if a profile already exists with this email
-  const { data: existingProfile } = await adminSupabase
+  const { data: existingProfile } = await supabaseAdmin
     .from('profiles')
     .select('id')
     .eq('email', lead.email)
@@ -142,7 +140,7 @@ export async function convertLeadToClient(leadId: string) {
 
   // Create auth user (sends invite email) — the handle_new_user trigger
   // auto-creates the profiles and subscriptions rows
-  const { data: newUser, error: createError } = await adminSupabase.auth.admin.createUser({
+  const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
     email: lead.email,
     email_confirm: true,
     user_metadata: { full_name: lead.full_name },
@@ -153,7 +151,7 @@ export async function convertLeadToClient(leadId: string) {
   }
 
   // Send a password reset so the new client can set their password
-  await adminSupabase.auth.admin.generateLink({
+  await supabaseAdmin.auth.admin.generateLink({
     type: 'magiclink',
     email: lead.email,
   })
@@ -218,6 +216,32 @@ export async function deleteClient(userId: string) {
   redirect('/dashboard/admin/clients')
 }
 
+export async function updateRevenueGoal(targetUserId: string, goal: number) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  // Allow the user to edit their own goal, or admin to edit any
+  const isAdmin = profile?.role === 'admin'
+  if (user.id !== targetUserId && !isAdmin) throw new Error('Forbidden')
+
+  const client = isAdmin ? supabaseAdmin : supabase
+  const { error } = await client
+    .from('business_metrics')
+    .update({ revenue_goal_1yr: goal, updated_at: new Date().toISOString() })
+    .eq('user_id', targetUserId)
+
+  if (error) throw new Error(`Failed to update revenue goal: ${error.message}`)
+
+  revalidatePath('/dashboard/crucible-pro')
+}
+
 export async function revokeCrucibleProAccess(userId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -231,8 +255,7 @@ export async function revokeCrucibleProAccess(userId: string) {
 
   if (profile?.role !== 'admin') throw new Error('Forbidden')
 
-  const adminSupabase = await createAdminClient()
-  await adminSupabase
+  const { error } = await supabaseAdmin
     .from('profiles')
     .update({
       crucible_pro_status: null,
@@ -241,7 +264,10 @@ export async function revokeCrucibleProAccess(userId: string) {
     })
     .eq('id', userId)
 
+  if (error) throw new Error(`Failed to revoke access: ${error.message}`)
+
   revalidatePath(`/dashboard/admin/clients/${userId}`)
   revalidatePath('/dashboard/admin/clients')
   revalidatePath('/dashboard/admin')
+  revalidatePath('/dashboard/crucible-pro')
 }

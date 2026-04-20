@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Target, Users, Copy, Check, Plus, Trash2 } from 'lucide-react'
+import { Target, Users, Copy, Check, Plus, Trash2, Pencil } from 'lucide-react'
 import type { Rock, TeamMember } from '@/types/cruciblePro'
+import { updateRevenueGoal } from '@/lib/actions'
 
 const CHANDLER_INVITE_EMAIL = 'chandler@cruciblecoaching.org'
 
@@ -22,7 +23,7 @@ export function GoalsTeamTab({
 }) {
   return (
     <div className="space-y-6">
-      <RevenueGoalCard revenueGoal={revenueGoal} />
+      <RevenueGoalCard revenueGoal={revenueGoal} targetUserId={targetUserId} />
       <RocksCard rocks={rocks} targetUserId={targetUserId} isAdmin={isAdmin} />
       <TeamCard teamMembers={teamMembers} targetUserId={targetUserId} isAdmin={isAdmin} />
       <InviteChandlerCard />
@@ -30,19 +31,100 @@ export function GoalsTeamTab({
   )
 }
 
-function RevenueGoalCard({ revenueGoal }: { revenueGoal: number | null }) {
+function RevenueGoalCard({ revenueGoal, targetUserId }: { revenueGoal: number | null; targetUserId: string }) {
+  const router = useRouter()
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(revenueGoal?.toString() ?? '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  function startEditing() {
+    setValue(revenueGoal?.toString() ?? '')
+    setError(null)
+    setEditing(true)
+  }
+
+  async function save() {
+    const parsed = parseFloat(value.replace(/[^0-9.]/g, ''))
+    if (isNaN(parsed) || parsed <= 0) {
+      setError('Enter a valid dollar amount')
+      return
+    }
+    setSaving(true)
+    setError(null)
+    try {
+      await updateRevenueGoal(targetUserId, parsed)
+      setEditing(false)
+      router.refresh()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-[25px] p-6">
-      <div className="flex items-center gap-2 text-gray-500 text-xs uppercase tracking-wide font-semibold">
-        <Target className="w-4 h-4" />
-        Long-term revenue goal
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-gray-500 text-xs uppercase tracking-wide font-semibold">
+          <Target className="w-4 h-4" />
+          Long-term revenue goal
+        </div>
+        {!editing && (
+          <button
+            onClick={startEditing}
+            className="text-gray-400 hover:text-brand-orange transition"
+            title="Edit revenue goal"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+        )}
       </div>
-      <div className="mt-2 text-3xl font-bold text-gray-900">
-        {revenueGoal ? formatCurrency(revenueGoal) : '—'}
-      </div>
-      <p className="mt-2 text-xs text-gray-500">
-        Sourced from your intake. Update via the intake questionnaire to revise.
-      </p>
+      {editing ? (
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-gray-400">$</span>
+            <input
+              autoFocus
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') save()
+                if (e.key === 'Escape') setEditing(false)
+              }}
+              placeholder="e.g. 5000000"
+              className="text-2xl font-bold text-gray-900 bg-transparent border-b-2 border-brand-orange focus:outline-none w-full"
+            />
+          </div>
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={save}
+              disabled={saving}
+              className="px-3 py-1.5 rounded-full bg-brand-orange text-white text-sm font-semibold disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-3 py-1.5 rounded-full text-sm text-gray-500 hover:text-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-2 text-3xl font-bold text-gray-900">
+            {revenueGoal ? formatCurrency(revenueGoal) : '—'}
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Auto-populated from intake. Click the pencil to update.
+          </p>
+        </>
+      )}
     </div>
   )
 }

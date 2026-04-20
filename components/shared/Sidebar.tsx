@@ -86,9 +86,10 @@ interface SidebarProps {
   mobileOpen?: boolean
   onMobileClose?: () => void
   role?: string
+  crucibleProStatus?: string | null
 }
 
-export function Sidebar({ mobileOpen = false, onMobileClose, role }: SidebarProps) {
+export function Sidebar({ mobileOpen = false, onMobileClose, role, crucibleProStatus }: SidebarProps) {
   const pathname = usePathname()
   const { collapsed, toggle } = useSidebarCollapsed()
 
@@ -170,7 +171,14 @@ export function Sidebar({ mobileOpen = false, onMobileClose, role }: SidebarProp
                   <span className="absolute left-0 w-0.5 h-5 bg-brand-orange rounded-full" />
                 )}
                 <span className={isActive ? 'text-brand-orange' : ''}>{item.icon}</span>
-                <span className={collapsed ? 'md:hidden' : ''}>{item.label}</span>
+                <span className={collapsed ? 'md:hidden' : ''}>
+                  {item.label}
+                  {item.href === '/dashboard/crucible-pro' && crucibleProStatus === 'active' && (
+                    <span className="ml-1.5 inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-brand-orange/20 text-brand-orange leading-none">
+                      PRO
+                    </span>
+                  )}
+                </span>
               </Link>
             )
           })}
