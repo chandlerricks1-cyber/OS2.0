@@ -272,7 +272,11 @@ export function ReportViewer({ userId }: ReportViewerProps) {
     setError(null)
     try {
       const url = refresh ? '/api/report?refresh=true' : '/api/report'
-      const res = await fetch(url, { method: 'POST' })
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: userId }),
+      })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error ?? `Failed to load report (HTTP ${res.status})`)

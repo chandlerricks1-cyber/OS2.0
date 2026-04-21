@@ -10,27 +10,72 @@ import Link from 'next/link'
 import { Package, AlertTriangle, LayoutGrid, ArrowRight } from 'lucide-react'
 import { OFFER_TYPES, OFFER_TYPE_LABELS, type OfferType } from '@/types/offer'
 import { BookCallButton } from '@/components/dashboard/BookCallButton'
+import { AdminClientSearch } from '@/components/dashboard/AdminClientSearch'
+import type { ClientOption } from '@/types/cruciblePro'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ client?: string }>
+}) {
+  const { client: clientParam } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
+
+  let clients: ClientOption[] = []
+  let targetUserId = user.id
+
+  if (isAdmin) {
+    const { data: list } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, crucible_pro_status')
+      .eq('role', 'client')
+      .order('full_name', { ascending: true, nullsFirst: false })
+      .order('email')
+    clients = (list as ClientOption[] | null) ?? []
+    if (clientParam && clients.some((c) => c.id === clientParam)) {
+      targetUserId = clientParam
+    } else if (clients.length > 0) {
+      targetUserId = clients[0].id
+    }
+  }
+
   const { data: metrics } = await supabase
     .from('business_metrics')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', targetUserId)
     .single()
 
   if (!metrics) {
+    const clientName = isAdmin
+      ? (clients.find((c) => c.id === targetUserId)?.full_name ?? clients.find((c) => c.id === targetUserId)?.email ?? 'This client')
+      : null
     return (
-      <div className="max-w-2xl mx-auto text-center py-16">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">No data yet</h2>
-        <p className="text-gray-500 mb-6">Complete the intake analysis to see your metrics.</p>
-        <Link href="/intake" className="btn-gradient px-6 py-2.5 inline-block">
-          Start Intake
-        </Link>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {isAdmin && <AdminClientSearch clients={clients} targetUserId={targetUserId} />}
+        <div className="max-w-2xl mx-auto text-center py-16">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No data yet</h2>
+          <p className="text-gray-500 mb-6">
+            {clientName
+              ? `${clientName} hasn\u2019t completed the intake analysis yet.`
+              : 'Complete the intake analysis to see your metrics.'}
+          </p>
+          {!isAdmin && (
+            <Link href="/intake" className="btn-gradient px-6 py-2.5 inline-block">
+              Start Intake
+            </Link>
+          )}
+        </div>
       </div>
     )
   }
@@ -41,12 +86,12 @@ export default async function DashboardPage() {
   const { data: moneyOffers } = await supabase
     .from('offers')
     .select('offer_type')
-    .eq('user_id', user.id)
+    .eq('user_id', targetUserId)
     .eq('is_active', true)
   const { count: milestoneCount } = await supabase
     .from('milestones')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', targetUserId)
   const counts: Record<OfferType, number> = { attraction: 0, core: 0, upsell: 0, downsell: 0, continuity: 0 }
   for (const row of (moneyOffers as { offer_type: OfferType }[] | null) ?? []) {
     counts[row.offer_type] = (counts[row.offer_type] ?? 0) + 1
@@ -58,8 +103,14 @@ export default async function DashboardPage() {
   if (counts.continuity === 0) gaps.push('No continuity offer')
   if ((milestoneCount ?? 0) === 0 && totalMoneyOffers > 0) gaps.push('No milestones mapped')
 
+  const reportHref = isAdmin && targetUserId !== user.id
+    ? `/dashboard/report?client=${targetUserId}`
+    : '/dashboard/report'
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+
+      {isAdmin && <AdminClientSearch clients={clients} targetUserId={targetUserId} />}
 
       {/* Identity Header */}
       <div className="bg-white border border-gray-200 rounded-[25px] px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -100,7 +151,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <MetricsEditor metrics={metrics} />
             <Link
-              href="/dashboard/report"
+              href={reportHref}
               className="btn-gradient px-4 py-2 inline-block text-sm whitespace-nowrap"
             >
               View Report →
