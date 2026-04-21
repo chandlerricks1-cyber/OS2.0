@@ -298,6 +298,65 @@ export type Database = {
           },
         ]
       }
+      podcast_guest_prep: {
+        Row: {
+          authority: string | null
+          brand_script: string | null
+          created_at: string
+          empathy: string | null
+          external_problem: string | null
+          hero: string | null
+          id: string
+          internal_problem: string | null
+          lead_id: string
+          plan_step_1: string | null
+          plan_step_2: string | null
+          plan_step_3: string | null
+          the_win: string | null
+          whats_at_stake: string | null
+        }
+        Insert: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          empathy?: string | null
+          external_problem?: string | null
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          lead_id: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Update: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          empathy?: string | null
+          external_problem?: string | null
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          lead_id?: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_guest_prep_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "podcast_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       podcast_lead_tags: {
         Row: {
           created_at: string

@@ -42,6 +42,12 @@ export default async function AdminPodcastDetailPage({
     .eq('lead_id', id)
     .single()
 
+  const { data: guestPrep } = await adminSupabase
+    .from('podcast_guest_prep')
+    .select('*')
+    .eq('lead_id', id)
+    .single()
+
   const { data: tags } = await adminSupabase
     .from('podcast_lead_tags')
     .select('tag')
@@ -174,6 +180,49 @@ export default async function AdminPodcastDetailPage({
             <Field label="90-Day Goal" value={intake.goal_next_90_days} long />
             <Field label="Anything Else" value={intake.anything_else} long />
           </IntakeSection>
+        </div>
+      )}
+
+      {/* Guest Episode Prep (StoryBrand) */}
+      {guestPrep ? (
+        <div className="space-y-6 mt-6">
+          <h2 className="text-xl font-bold text-gray-900">Guest Episode Prep</h2>
+
+          {guestPrep.brand_script && (
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-200/50 p-6">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Generated Brand Script</h3>
+              <p className="text-gray-900 text-lg leading-relaxed italic">&ldquo;{guestPrep.brand_script}&rdquo;</p>
+            </div>
+          )}
+
+          <IntakeSection title="The Hero">
+            <Field label="Typical Customer" value={guestPrep.hero} long />
+          </IntakeSection>
+
+          <IntakeSection title="The Problem">
+            <Field label="External Problem" value={guestPrep.external_problem} long />
+            <Field label="Internal Problem" value={guestPrep.internal_problem} long />
+            <Field label="What's At Stake" value={guestPrep.whats_at_stake} long />
+          </IntakeSection>
+
+          <IntakeSection title="The Guide">
+            <Field label="Empathy" value={guestPrep.empathy} long />
+            <Field label="Authority" value={guestPrep.authority} long />
+          </IntakeSection>
+
+          <IntakeSection title="The Plan">
+            <Field label="Step 1" value={guestPrep.plan_step_1} />
+            <Field label="Step 2" value={guestPrep.plan_step_2} />
+            <Field label="Step 3" value={guestPrep.plan_step_3} />
+          </IntakeSection>
+
+          <IntakeSection title="The Win">
+            <Field label="Happy Ending" value={guestPrep.the_win} long />
+          </IntakeSection>
+        </div>
+      ) : intake && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center mt-6">
+          <p className="text-gray-400">Guest episode prep not yet completed</p>
         </div>
       )}
     </div>

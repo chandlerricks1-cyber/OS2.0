@@ -119,7 +119,7 @@ function PodcastIntakeContent() {
         return
       }
 
-      router.push('/podcast/thank-you')
+      router.push(`/podcast/guest-prep?lead=${leadId}`)
     } catch {
       setErrors({ form: 'Something went wrong. Please try again.' })
     } finally {
