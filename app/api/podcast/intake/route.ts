@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { seedBusinessMetricsFromPodcast } from '@/lib/podcast/seed-metrics'
 import {
   addContactNote,
   createOpportunity,
@@ -191,6 +192,21 @@ export async function POST(request: Request) {
       .from('podcast_leads')
       .update({ status: 'intake_complete', updated_at: new Date().toISOString() })
       .eq('id', lead_id)
+
+    // Best-effort: seed business_metrics from the questionnaire so the
+    // dashboard isn't empty when they finish the funnel. Idempotent — safe
+    // to call again from /api/podcast/finish.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', lead.email)
+      .maybeSingle()
+    if (profile?.id) {
+      const seedRes = await seedBusinessMetricsFromPodcast(profile.id, lead_id)
+      if (!seedRes.seeded) {
+        console.warn('[podcast-intake] metrics seed skipped:', seedRes.reason)
+      }
+    }
 
     // Advance the GHL opportunity to "Intake Submitted"
     const ghl = await pushIntakeToGhl({

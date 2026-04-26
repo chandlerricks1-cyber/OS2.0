@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { ensureSignedIn } from '@/lib/podcast/auto-signin'
 import {
   createOpportunity,
   findStageId,
@@ -8,47 +8,6 @@ import {
   isGhlConfigured,
   upsertContact,
 } from '@/lib/ghl/client'
-
-async function createAccountAndSignIn(lead: {
-  full_name: string
-  email: string
-  phone: string
-}): Promise<{ userId?: string; error?: string }> {
-  try {
-    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: lead.email,
-      email_confirm: true,
-      user_metadata: { full_name: lead.full_name, phone: lead.phone },
-    })
-
-    let userId = created?.user?.id
-    if (createErr && !userId) {
-      const msg = createErr.message?.toLowerCase() ?? ''
-      const alreadyExists = msg.includes('already') || msg.includes('registered') || msg.includes('exists')
-      if (!alreadyExists) return { error: createErr.message }
-    }
-
-    const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: lead.email,
-    })
-    if (linkErr || !linkData?.properties?.hashed_token) {
-      return { error: linkErr?.message ?? 'Failed to generate sign-in link' }
-    }
-    if (!userId) userId = linkData.user?.id
-
-    const cookieClient = await createClient()
-    const { error: verifyErr } = await cookieClient.auth.verifyOtp({
-      token_hash: linkData.properties.hashed_token,
-      type: 'magiclink',
-    })
-    if (verifyErr) return { error: verifyErr.message }
-
-    return { userId }
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Auth failed' }
-  }
-}
 
 function splitName(fullName: string): { firstName: string; lastName: string } {
   const parts = fullName.trim().split(/\s+/)
@@ -168,7 +127,11 @@ export async function POST(request: Request) {
       data = newLead
     }
 
-    const auth = await createAccountAndSignIn(cleanLead)
+    const auth = await ensureSignedIn({
+      email: cleanLead.email,
+      fullName: cleanLead.full_name,
+      phone: cleanLead.phone,
+    })
     if (auth.error) {
       console.warn('[podcast-lead] auto account creation failed:', auth.error)
     }

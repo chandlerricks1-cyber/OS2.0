@@ -14,11 +14,12 @@ export default async function AppLayout({
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, { data: session }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('intake_sessions').select('status').eq('user_id', user.id).maybeSingle(),
+  ])
 
-  return <AppShell user={profile}>{children}</AppShell>
+  const intakeIncomplete = !session || session.status !== 'completed'
+
+  return <AppShell user={profile} intakeIncomplete={intakeIncomplete}>{children}</AppShell>
 }

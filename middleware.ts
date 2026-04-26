@@ -30,7 +30,12 @@ export async function middleware(request: NextRequest) {
 
   // Public routes — no auth needed
   const publicRoutes = ['/', '/login', '/signup']
-  const isPublic = publicRoutes.includes(pathname) || pathname.startsWith('/podcast') || pathname.startsWith('/api/podcast')
+  const isPublic =
+    publicRoutes.includes(pathname) ||
+    pathname.startsWith('/podcast') ||
+    pathname.startsWith('/api/podcast') ||
+    pathname.startsWith('/brand-script') ||
+    pathname.startsWith('/api/brand-script')
   if (isPublic) {
     // Redirect logged-in users away from auth pages
     if (user && (pathname === '/login' || pathname === '/signup')) {

@@ -1,12 +1,12 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Logo } from '@/components/shared/Logo'
 import { useSystemTheme } from '@/hooks/useSystemTheme'
-import { ArrowRight, Sun, Moon, UserCircle2, AlertTriangle, Compass, ListChecks, Trophy, Sparkles, Copy, Check } from 'lucide-react'
+import { Sun, Moon, UserCircle2, AlertTriangle, Compass, ListChecks, Trophy, Sparkles, Copy, Check, User, RefreshCw } from 'lucide-react'
 
 const sectionMeta = [
+  { icon: User, title: 'About You', number: '00' },
   { icon: UserCircle2, title: 'The Hero (Your Customer)', number: '01' },
   { icon: AlertTriangle, title: 'The Problem', number: '02' },
   { icon: Compass, title: 'The Guide (Your Company)', number: '03' },
@@ -14,37 +14,27 @@ const sectionMeta = [
   { icon: Trophy, title: 'The Win', number: '05' },
 ]
 
-export default function GuestPrepPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-page-dark flex items-center justify-center">
-        <div className="text-gray-400">Loading...</div>
-      </div>
-    }>
-      <GuestPrepContent />
-    </Suspense>
-  )
+const initialForm = {
+  full_name: '',
+  email: '',
+  phone: '',
+  hero: '',
+  external_problem: '',
+  internal_problem: '',
+  whats_at_stake: '',
+  empathy: '',
+  authority: '',
+  plan_step_1: '',
+  plan_step_2: '',
+  plan_step_3: '',
+  the_win: '',
+  _honey: '',
 }
 
-function GuestPrepContent() {
+export default function BrandScriptPage() {
   const { isDark, toggle } = useSystemTheme()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const leadId = searchParams.get('lead')
 
-  const [form, setForm] = useState({
-    hero: '',
-    external_problem: '',
-    internal_problem: '',
-    whats_at_stake: '',
-    empathy: '',
-    authority: '',
-    plan_step_1: '',
-    plan_step_2: '',
-    plan_step_3: '',
-    the_win: '',
-    _honey: '',
-  })
+  const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [phase, setPhase] = useState<'form' | 'generating' | 'result'>('form')
   const [brandScript, setBrandScript] = useState<string | null>(null)
@@ -71,7 +61,7 @@ function GuestPrepContent() {
     )
     document.querySelectorAll('.scroll-reveal:not(.revealed)').forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [isDark])
+  }, [isDark, phase])
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -83,6 +73,9 @@ function GuestPrepContent() {
     setErrors({})
 
     const newErrors: Record<string, string> = {}
+    if (!form.full_name.trim()) newErrors.full_name = 'Required'
+    if (!form.email.trim()) newErrors.email = 'Required'
+    if (!form.phone.trim()) newErrors.phone = 'Required'
     if (!form.hero.trim()) newErrors.hero = 'Required'
     if (!form.external_problem.trim()) newErrors.external_problem = 'Required'
     if (!form.empathy.trim()) newErrors.empathy = 'Required'
@@ -97,10 +90,10 @@ function GuestPrepContent() {
 
     setPhase('generating')
     try {
-      const res = await fetch('/api/podcast/guest-prep', {
+      const res = await fetch('/api/brand-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead_id: leadId, ...form }),
+        body: JSON.stringify(form),
       })
       const data = await res.json()
 
@@ -128,7 +121,15 @@ function GuestPrepContent() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Theme classes (identical to intake page)
+  function handleStartOver() {
+    setForm(initialForm)
+    setErrors({})
+    setBrandScript(null)
+    setAiError(false)
+    setPhase('form')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const pageBg = isDark ? 'bg-page-dark' : 'bg-white'
   const heading = isDark ? 'text-white' : 'text-page-dark'
   const body = isDark ? 'text-gray-400' : 'text-gray-600'
@@ -145,18 +146,6 @@ function GuestPrepContent() {
   const textareaBase = `${inputBase} resize-y min-h-[80px]`
   const labelBase = `block text-sm font-semibold mb-2 ${labelCls}`
 
-  if (!leadId) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center px-6 ${pageBg}`}>
-        <div className="text-center">
-          <h1 className={`text-2xl font-bold mb-4 ${heading}`}>Start from the beginning</h1>
-          <p className={`mb-6 ${body}`}>Please book your episode first before completing the prep sheet.</p>
-          <a href="/podcast" className="btn-gradient px-8 py-3 inline-block">Book Your Episode</a>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={`min-h-screen transition-colors duration-300 ${pageBg}`}>
       {/* ── Header ───────────────────────────────────── */}
@@ -164,7 +153,7 @@ function GuestPrepContent() {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Logo height={56} variant={isDark ? 'light' : 'dark'} />
           <div className="flex items-center gap-3">
-            <span className={`text-sm ${body}`}>Guest Episode Prep</span>
+            <span className={`text-sm ${body}`}>Free Brand Script Generator</span>
             <button
               onClick={toggle}
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-900'}`}
@@ -201,7 +190,7 @@ function GuestPrepContent() {
               </span>
             </h1>
             <p className={`text-lg max-w-xl mx-auto ${body}`}>
-              Here&apos;s your 60-90 second brand moment for the podcast. Practice it once or twice out loud — but don&apos;t memorize it. Just know the beats and let it flow naturally.
+              Here&apos;s your 60-90 second brand moment. Practice it once or twice out loud — but don&apos;t memorize it. Just know the beats and let it flow naturally.
             </p>
           </div>
 
@@ -221,20 +210,23 @@ function GuestPrepContent() {
           ) : (
             <div className={`rounded-[25px] p-8 border text-center ${card}`}>
               <p className={body}>
-                We saved your answers but couldn&apos;t generate the script right now. Don&apos;t worry — Chandler will craft it on his end before your episode.
+                We saved your answers but couldn&apos;t generate the script right now. Please try again in a moment.
               </p>
+              {aiError && (
+                <p className={`text-sm mt-2 ${muted}`}>The AI generator hit a snag — your answers are safe.</p>
+              )}
             </div>
           )}
 
           <div className="mt-8 space-y-4">
             <button
-              onClick={() => router.push(`/podcast/finish?lead=${leadId}`)}
+              onClick={handleStartOver}
               className="btn-gradient !flex w-full h-14 items-center justify-center gap-2 text-base"
             >
-              Continue <ArrowRight className="w-4 h-4" />
+              Start Over <RefreshCw className="w-4 h-4" />
             </button>
             <p className={`text-sm text-center ${muted}`}>
-              One last step — set a password and we&apos;ll take you straight to your dashboard.
+              Want help bringing this to life across your marketing? Reach out to Chandler.
             </p>
           </div>
         </div>
@@ -247,16 +239,17 @@ function GuestPrepContent() {
           <div className="max-w-3xl mx-auto px-6 pt-12 pb-8">
             <div className="text-center scroll-reveal">
               <h1 className={`text-3xl md:text-4xl font-black tracking-tight mb-4 ${heading}`}>
-                Guest Episode{' '}
+                Free{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end">
-                  Prep
-                </span>
+                  Brand Script
+                </span>{' '}
+                Generator
               </h1>
               <p className={`text-lg max-w-xl mx-auto mb-3 ${body}`}>
-                During your episode, you&apos;ll get 1-2 minutes to talk about your company in a way that makes potential customers think: &ldquo;That&apos;s who I want to call.&rdquo;
+                Craft the 60-90 second story that makes potential customers think: &ldquo;That&apos;s who I want to call.&rdquo;
               </p>
               <p className={`max-w-xl mx-auto ${muted}`}>
-                This short exercise will help you nail that moment. Your customer is the hero of the story — and your company is the guide that helps them win.
+                Answer a few short questions and we&apos;ll turn them into a brand script you can use on a podcast, a sales call, or your homepage. Your customer is the hero — your company is the guide that helps them win.
               </p>
             </div>
           </div>
@@ -265,9 +258,59 @@ function GuestPrepContent() {
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-6 pb-24">
             <input type="text" name="_honey" value={form._honey} onChange={(e) => update('_honey', e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
 
-            {/* Section 1: The Hero */}
+            {/* Section 0: About You */}
             <div className="scroll-reveal mb-10">
               <SectionHeader icon={sectionMeta[0].icon} title={sectionMeta[0].title} number={sectionMeta[0].number} headingClass={heading} />
+              <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
+                <p className={`text-sm ${hintCls}`}>So we know who&apos;s using the tool. We won&apos;t spam you.</p>
+                <div>
+                  <label htmlFor="full_name" className={labelBase}>Full Name *</label>
+                  <input
+                    id="full_name"
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={form.full_name}
+                    onChange={(e) => update('full_name', e.target.value)}
+                    className={inputBase}
+                    data-error={!!errors.full_name || undefined}
+                    autoComplete="name"
+                  />
+                  {errors.full_name && <p className="text-red-400 text-sm mt-1">{errors.full_name}</p>}
+                </div>
+                <div>
+                  <label htmlFor="email" className={labelBase}>Email *</label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="you@company.com"
+                    value={form.email}
+                    onChange={(e) => update('email', e.target.value)}
+                    className={inputBase}
+                    data-error={!!errors.email || undefined}
+                    autoComplete="email"
+                  />
+                  {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <label htmlFor="phone" className={labelBase}>Phone *</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                    value={form.phone}
+                    onChange={(e) => update('phone', e.target.value)}
+                    className={inputBase}
+                    data-error={!!errors.phone || undefined}
+                    autoComplete="tel"
+                  />
+                  {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 1: The Hero */}
+            <div className="scroll-reveal mb-10">
+              <SectionHeader icon={sectionMeta[1].icon} title={sectionMeta[1].title} number={sectionMeta[1].number} headingClass={heading} />
               <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
                 <p className={`text-sm ${hintCls}`}>Who is your typical customer and what do they want?</p>
                 <div>
@@ -288,7 +331,7 @@ function GuestPrepContent() {
 
             {/* Section 2: The Problem */}
             <div className="scroll-reveal mb-10">
-              <SectionHeader icon={sectionMeta[1].icon} title={sectionMeta[1].title} number={sectionMeta[1].number} headingClass={heading} />
+              <SectionHeader icon={sectionMeta[2].icon} title={sectionMeta[2].title} number={sectionMeta[2].number} headingClass={heading} />
               <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
                 <p className={`text-sm ${hintCls}`}>Think about three layers of your customer&apos;s problem:</p>
                 <div>
@@ -331,7 +374,7 @@ function GuestPrepContent() {
 
             {/* Section 3: The Guide */}
             <div className="scroll-reveal mb-10">
-              <SectionHeader icon={sectionMeta[2].icon} title={sectionMeta[2].title} number={sectionMeta[2].number} headingClass={heading} />
+              <SectionHeader icon={sectionMeta[3].icon} title={sectionMeta[3].title} number={sectionMeta[3].number} headingClass={heading} />
               <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
                 <p className={`text-sm ${hintCls}`}>A great guide does two things: shows empathy (&ldquo;I understand&rdquo;) and demonstrates authority (&ldquo;I&apos;ve done this before&rdquo;).</p>
                 <div>
@@ -363,7 +406,7 @@ function GuestPrepContent() {
 
             {/* Section 4: The Plan */}
             <div className="scroll-reveal mb-10">
-              <SectionHeader icon={sectionMeta[3].icon} title={sectionMeta[3].title} number={sectionMeta[3].number} headingClass={heading} />
+              <SectionHeader icon={sectionMeta[4].icon} title={sectionMeta[4].title} number={sectionMeta[4].number} headingClass={heading} />
               <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
                 <p className={`text-sm ${hintCls}`}>Give people 3 simple steps. This removes confusion and makes it easy to say yes.</p>
                 <div>
@@ -404,7 +447,7 @@ function GuestPrepContent() {
 
             {/* Section 5: The Win */}
             <div className="scroll-reveal mb-10">
-              <SectionHeader icon={sectionMeta[4].icon} title={sectionMeta[4].title} number={sectionMeta[4].number} headingClass={heading} />
+              <SectionHeader icon={sectionMeta[5].icon} title={sectionMeta[5].title} number={sectionMeta[5].number} headingClass={heading} />
               <div className={`rounded-[25px] p-8 border space-y-5 ${card}`}>
                 <p className={`text-sm ${hintCls}`}>Paint the picture: what does life look like AFTER they work with you?</p>
                 <div>
