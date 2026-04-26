@@ -103,6 +103,84 @@ export type Database = {
           },
         ]
       }
+      brand_scripts: {
+        Row: {
+          authority: string | null
+          brand_script: string | null
+          created_at: string
+          email: string
+          empathy: string | null
+          external_problem: string | null
+          full_name: string
+          hero: string | null
+          id: string
+          internal_problem: string | null
+          matched_ghl_contact_id: string | null
+          matched_podcast_lead_id: string | null
+          phone: string
+          plan_step_1: string | null
+          plan_step_2: string | null
+          plan_step_3: string | null
+          the_win: string | null
+          whats_at_stake: string | null
+        }
+        Insert: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          email: string
+          empathy?: string | null
+          external_problem?: string | null
+          full_name: string
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          matched_ghl_contact_id?: string | null
+          matched_podcast_lead_id?: string | null
+          phone: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Update: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          email?: string
+          empathy?: string | null
+          external_problem?: string | null
+          full_name?: string
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          matched_ghl_contact_id?: string | null
+          matched_podcast_lead_id?: string | null
+          phone?: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_scripts_matched_ghl_contact_id_fkey"
+            columns: ["matched_ghl_contact_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_contacts"
+            referencedColumns: ["ghl_id"]
+          },
+          {
+            foreignKeyName: "brand_scripts_matched_podcast_lead_id_fkey"
+            columns: ["matched_podcast_lead_id"]
+            isOneToOne: false
+            referencedRelation: "podcast_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_tags: {
         Row: {
           created_at: string
@@ -141,6 +219,756 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      crucible_appointments: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          ghl_event_id: string | null
+          guests: string[]
+          id: string
+          last_synced_at: string | null
+          meeting_link: string | null
+          notes: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          ghl_event_id?: string | null
+          guests?: string[]
+          id?: string
+          last_synced_at?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          ghl_event_id?: string | null
+          guests?: string[]
+          id?: string
+          last_synced_at?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crucible_call_recordings: {
+        Row: {
+          appointment_id: string | null
+          call_date: string
+          created_at: string
+          id: string
+          title: string
+          transcript_raw: string | null
+          transcript_segments: Json | null
+          updated_at: string
+          user_id: string
+          zoom_recording_url: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          call_date: string
+          created_at?: string
+          id?: string
+          title: string
+          transcript_raw?: string | null
+          transcript_segments?: Json | null
+          updated_at?: string
+          user_id: string
+          zoom_recording_url?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          call_date?: string
+          created_at?: string
+          id?: string
+          title?: string
+          transcript_raw?: string | null
+          transcript_segments?: Json | null
+          updated_at?: string
+          user_id?: string
+          zoom_recording_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_call_recordings_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "crucible_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crucible_call_recordings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crucible_rocks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_rocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crucible_tasks: {
+        Row: {
+          accountable_name: string | null
+          accountable_team_member_id: string | null
+          call_recording_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accountable_name?: string | null
+          accountable_team_member_id?: string | null
+          call_recording_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accountable_name?: string | null
+          accountable_team_member_id?: string | null
+          call_recording_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_tasks_accountable_team_member_id_fkey"
+            columns: ["accountable_team_member_id"]
+            isOneToOne: false
+            referencedRelation: "crucible_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crucible_tasks_call_recording_id_fkey"
+            columns: ["call_recording_id"]
+            isOneToOne: false
+            referencedRelation: "crucible_call_recordings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crucible_tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crucible_team_members: {
+        Row: {
+          accountabilities: string[]
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          position: string | null
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accountabilities?: string[]
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          position?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accountabilities?: string[]
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          position?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ghl_appointments: {
+        Row: {
+          address: string | null
+          appointment_status: string | null
+          assigned_user_id: string | null
+          calendar_id: string | null
+          contact_id: string | null
+          deleted_at: string | null
+          end_time: string | null
+          ghl_id: string
+          meeting_location_type: string | null
+          notes: string | null
+          raw: Json | null
+          start_time: string | null
+          synced_at: string
+          title: string | null
+        }
+        Insert: {
+          address?: string | null
+          appointment_status?: string | null
+          assigned_user_id?: string | null
+          calendar_id?: string | null
+          contact_id?: string | null
+          deleted_at?: string | null
+          end_time?: string | null
+          ghl_id: string
+          meeting_location_type?: string | null
+          notes?: string | null
+          raw?: Json | null
+          start_time?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Update: {
+          address?: string | null
+          appointment_status?: string | null
+          assigned_user_id?: string | null
+          calendar_id?: string | null
+          contact_id?: string | null
+          deleted_at?: string | null
+          end_time?: string | null
+          ghl_id?: string
+          meeting_location_type?: string | null
+          notes?: string | null
+          raw?: Json | null
+          start_time?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghl_appointments_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_calendars"
+            referencedColumns: ["ghl_id"]
+          },
+          {
+            foreignKeyName: "ghl_appointments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_contacts"
+            referencedColumns: ["ghl_id"]
+          },
+        ]
+      }
+      ghl_calendars: {
+        Row: {
+          description: string | null
+          ghl_id: string
+          is_active: boolean
+          name: string
+          raw: Json | null
+          slot_duration: number | null
+          slot_interval: number | null
+          synced_at: string
+          team_members: Json
+          timezone: string | null
+        }
+        Insert: {
+          description?: string | null
+          ghl_id: string
+          is_active?: boolean
+          name: string
+          raw?: Json | null
+          slot_duration?: number | null
+          slot_interval?: number | null
+          synced_at?: string
+          team_members?: Json
+          timezone?: string | null
+        }
+        Update: {
+          description?: string | null
+          ghl_id?: string
+          is_active?: boolean
+          name?: string
+          raw?: Json | null
+          slot_duration?: number | null
+          slot_interval?: number | null
+          synced_at?: string
+          team_members?: Json
+          timezone?: string | null
+        }
+        Relationships: []
+      }
+      ghl_contacts: {
+        Row: {
+          assigned_user_id: string | null
+          country: string | null
+          custom_fields: Json
+          date_added: string | null
+          deleted_at: string | null
+          dnd: boolean
+          email: string | null
+          first_name: string | null
+          full_name: string | null
+          ghl_id: string
+          last_name: string | null
+          location_id: string | null
+          phone: string | null
+          raw: Json | null
+          source: string | null
+          synced_at: string
+          tags: string[]
+          timezone: string | null
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          country?: string | null
+          custom_fields?: Json
+          date_added?: string | null
+          deleted_at?: string | null
+          dnd?: boolean
+          email?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          ghl_id: string
+          last_name?: string | null
+          location_id?: string | null
+          phone?: string | null
+          raw?: Json | null
+          source?: string | null
+          synced_at?: string
+          tags?: string[]
+          timezone?: string | null
+        }
+        Update: {
+          assigned_user_id?: string | null
+          country?: string | null
+          custom_fields?: Json
+          date_added?: string | null
+          deleted_at?: string | null
+          dnd?: boolean
+          email?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          ghl_id?: string
+          last_name?: string | null
+          location_id?: string | null
+          phone?: string | null
+          raw?: Json | null
+          source?: string | null
+          synced_at?: string
+          tags?: string[]
+          timezone?: string | null
+        }
+        Relationships: []
+      }
+      ghl_conversations: {
+        Row: {
+          assigned_to: string | null
+          contact_id: string | null
+          ghl_id: string
+          inbox_status: string | null
+          last_message_at: string | null
+          last_message_body: string | null
+          last_message_type: string | null
+          raw: Json | null
+          synced_at: string
+          unread_count: number
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          ghl_id: string
+          inbox_status?: string | null
+          last_message_at?: string | null
+          last_message_body?: string | null
+          last_message_type?: string | null
+          raw?: Json | null
+          synced_at?: string
+          unread_count?: number
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          ghl_id?: string
+          inbox_status?: string | null
+          last_message_at?: string | null
+          last_message_body?: string | null
+          last_message_type?: string | null
+          raw?: Json | null
+          synced_at?: string
+          unread_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghl_conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_contacts"
+            referencedColumns: ["ghl_id"]
+          },
+        ]
+      }
+      ghl_messages: {
+        Row: {
+          attachments: Json
+          body: string | null
+          contact_id: string | null
+          conversation_id: string
+          direction: string
+          from_addr: string | null
+          ghl_id: string
+          message_at: string
+          message_type: string | null
+          meta: Json | null
+          status: string | null
+          synced_at: string
+          to_addr: string | null
+        }
+        Insert: {
+          attachments?: Json
+          body?: string | null
+          contact_id?: string | null
+          conversation_id: string
+          direction: string
+          from_addr?: string | null
+          ghl_id: string
+          message_at: string
+          message_type?: string | null
+          meta?: Json | null
+          status?: string | null
+          synced_at?: string
+          to_addr?: string | null
+        }
+        Update: {
+          attachments?: Json
+          body?: string | null
+          contact_id?: string | null
+          conversation_id?: string
+          direction?: string
+          from_addr?: string | null
+          ghl_id?: string
+          message_at?: string
+          message_type?: string | null
+          meta?: Json | null
+          status?: string | null
+          synced_at?: string
+          to_addr?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghl_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_contacts"
+            referencedColumns: ["ghl_id"]
+          },
+          {
+            foreignKeyName: "ghl_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_conversations"
+            referencedColumns: ["ghl_id"]
+          },
+        ]
+      }
+      ghl_opportunities: {
+        Row: {
+          assigned_to: string | null
+          contact_id: string | null
+          custom_fields: Json
+          date_created: string | null
+          date_updated: string | null
+          deleted_at: string | null
+          ghl_id: string
+          monetary_value: number | null
+          name: string | null
+          pipeline_id: string | null
+          raw: Json | null
+          source: string | null
+          stage_id: string | null
+          status: string | null
+          synced_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          custom_fields?: Json
+          date_created?: string | null
+          date_updated?: string | null
+          deleted_at?: string | null
+          ghl_id: string
+          monetary_value?: number | null
+          name?: string | null
+          pipeline_id?: string | null
+          raw?: Json | null
+          source?: string | null
+          stage_id?: string | null
+          status?: string | null
+          synced_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_id?: string | null
+          custom_fields?: Json
+          date_created?: string | null
+          date_updated?: string | null
+          deleted_at?: string | null
+          ghl_id?: string
+          monetary_value?: number | null
+          name?: string | null
+          pipeline_id?: string | null
+          raw?: Json | null
+          source?: string | null
+          stage_id?: string | null
+          status?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghl_opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_contacts"
+            referencedColumns: ["ghl_id"]
+          },
+          {
+            foreignKeyName: "ghl_opportunities_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_pipelines"
+            referencedColumns: ["ghl_id"]
+          },
+          {
+            foreignKeyName: "ghl_opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_pipeline_stages"
+            referencedColumns: ["ghl_id"]
+          },
+        ]
+      }
+      ghl_outbound_sends: {
+        Row: {
+          client_dedupe_key: string
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          error: string | null
+          ghl_message_id: string | null
+          id: string
+          status: string
+        }
+        Insert: {
+          client_dedupe_key: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          ghl_message_id?: string | null
+          id?: string
+          status?: string
+        }
+        Update: {
+          client_dedupe_key?: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          ghl_message_id?: string | null
+          id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      ghl_pipeline_stages: {
+        Row: {
+          ghl_id: string
+          name: string
+          pipeline_id: string
+          position: number
+          synced_at: string
+        }
+        Insert: {
+          ghl_id: string
+          name: string
+          pipeline_id: string
+          position?: number
+          synced_at?: string
+        }
+        Update: {
+          ghl_id?: string
+          name?: string
+          pipeline_id?: string
+          position?: number
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ghl_pipeline_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "ghl_pipelines"
+            referencedColumns: ["ghl_id"]
+          },
+        ]
+      }
+      ghl_pipelines: {
+        Row: {
+          ghl_id: string
+          name: string
+          position: number
+          raw: Json | null
+          synced_at: string
+        }
+        Insert: {
+          ghl_id: string
+          name: string
+          position?: number
+          raw?: Json | null
+          synced_at?: string
+        }
+        Update: {
+          ghl_id?: string
+          name?: string
+          position?: number
+          raw?: Json | null
+          synced_at?: string
+        }
+        Relationships: []
+      }
+      ghl_sync_state: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      ghl_webhook_events: {
+        Row: {
+          error: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          received_at: string
+        }
+        Insert: {
+          error?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          received_at?: string
+        }
+        Update: {
+          error?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          received_at?: string
+        }
+        Relationships: []
       }
       intake_messages: {
         Row: {
@@ -202,6 +1030,213 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestone_offers: {
+        Row: {
+          created_at: string
+          milestone_id: string
+          offer_id: string
+          sequence: number
+        }
+        Insert: {
+          created_at?: string
+          milestone_id: string
+          offer_id: string
+          sequence?: number
+        }
+        Update: {
+          created_at?: string
+          milestone_id?: string
+          offer_id?: string
+          sequence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_offers_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_offers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          classroom_body: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          offer_type: string
+          price: string | null
+          sales_pitch: string | null
+          short_description: string | null
+          sort_order: number
+          source: string
+          thumbnail_url: string | null
+          trigger: string | null
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          what_customer_gets: string | null
+          when_offered: string | null
+          why_do_it: string | null
+        }
+        Insert: {
+          classroom_body?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          offer_type: string
+          price?: string | null
+          sales_pitch?: string | null
+          short_description?: string | null
+          sort_order?: number
+          source?: string
+          thumbnail_url?: string | null
+          trigger?: string | null
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          what_customer_gets?: string | null
+          when_offered?: string | null
+          why_do_it?: string | null
+        }
+        Update: {
+          classroom_body?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          offer_type?: string
+          price?: string | null
+          sales_pitch?: string | null
+          short_description?: string | null
+          sort_order?: number
+          source?: string
+          thumbnail_url?: string | null
+          trigger?: string | null
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          what_customer_gets?: string | null
+          when_offered?: string | null
+          why_do_it?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      podcast_guest_prep: {
+        Row: {
+          authority: string | null
+          brand_script: string | null
+          created_at: string
+          empathy: string | null
+          external_problem: string | null
+          hero: string | null
+          id: string
+          internal_problem: string | null
+          lead_id: string
+          plan_step_1: string | null
+          plan_step_2: string | null
+          plan_step_3: string | null
+          the_win: string | null
+          whats_at_stake: string | null
+        }
+        Insert: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          empathy?: string | null
+          external_problem?: string | null
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          lead_id: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Update: {
+          authority?: string | null
+          brand_script?: string | null
+          created_at?: string
+          empathy?: string | null
+          external_problem?: string | null
+          hero?: string | null
+          id?: string
+          internal_problem?: string | null
+          lead_id?: string
+          plan_step_1?: string | null
+          plan_step_2?: string | null
+          plan_step_3?: string | null
+          the_win?: string | null
+          whats_at_stake?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_guest_prep_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "podcast_leads"
             referencedColumns: ["id"]
           },
         ]
@@ -298,65 +1333,6 @@ export type Database = {
           },
         ]
       }
-      podcast_guest_prep: {
-        Row: {
-          authority: string | null
-          brand_script: string | null
-          created_at: string
-          empathy: string | null
-          external_problem: string | null
-          hero: string | null
-          id: string
-          internal_problem: string | null
-          lead_id: string
-          plan_step_1: string | null
-          plan_step_2: string | null
-          plan_step_3: string | null
-          the_win: string | null
-          whats_at_stake: string | null
-        }
-        Insert: {
-          authority?: string | null
-          brand_script?: string | null
-          created_at?: string
-          empathy?: string | null
-          external_problem?: string | null
-          hero?: string | null
-          id?: string
-          internal_problem?: string | null
-          lead_id: string
-          plan_step_1?: string | null
-          plan_step_2?: string | null
-          plan_step_3?: string | null
-          the_win?: string | null
-          whats_at_stake?: string | null
-        }
-        Update: {
-          authority?: string | null
-          brand_script?: string | null
-          created_at?: string
-          empathy?: string | null
-          external_problem?: string | null
-          hero?: string | null
-          id?: string
-          internal_problem?: string | null
-          lead_id?: string
-          plan_step_1?: string | null
-          plan_step_2?: string | null
-          plan_step_3?: string | null
-          the_win?: string | null
-          whats_at_stake?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "podcast_guest_prep_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: true
-            referencedRelation: "podcast_leads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       podcast_lead_tags: {
         Row: {
           created_at: string
@@ -443,8 +1419,9 @@ export type Database = {
           crucible_pro_status: string | null
           email: string
           full_name: string | null
-          id: string
           ghl_contact_id: string | null
+          id: string
+          phone: string | null
           role: string
           updated_at: string
         }
@@ -457,6 +1434,7 @@ export type Database = {
           full_name?: string | null
           ghl_contact_id?: string | null
           id: string
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -469,6 +1447,7 @@ export type Database = {
           full_name?: string | null
           ghl_contact_id?: string | null
           id?: string
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -564,28 +1543,28 @@ export type Database = {
       }
       user_preferences: {
         Row: {
-          user_id: string
+          created_at: string
           email_reports: boolean
           email_updates: boolean
           timezone: string | null
-          created_at: string
           updated_at: string
+          user_id: string
         }
         Insert: {
-          user_id: string
+          created_at?: string
           email_reports?: boolean
           email_updates?: boolean
           timezone?: string | null
-          created_at?: string
           updated_at?: string
+          user_id: string
         }
         Update: {
-          user_id?: string
+          created_at?: string
           email_reports?: boolean
           email_updates?: boolean
           timezone?: string | null
-          created_at?: string
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -597,419 +1576,14 @@ export type Database = {
           },
         ]
       }
-      offers: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          offer_type: string
-          price: string | null
-          what_customer_gets: string | null
-          why_do_it: string | null
-          when_offered: string | null
-          trigger: string | null
-          sales_pitch: string | null
-          thumbnail_url: string | null
-          short_description: string | null
-          video_url: string | null
-          classroom_body: string | null
-          sort_order: number
-          is_active: boolean
-          source: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          offer_type: string
-          price?: string | null
-          what_customer_gets?: string | null
-          why_do_it?: string | null
-          when_offered?: string | null
-          trigger?: string | null
-          sales_pitch?: string | null
-          thumbnail_url?: string | null
-          short_description?: string | null
-          video_url?: string | null
-          classroom_body?: string | null
-          sort_order?: number
-          is_active?: boolean
-          source?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          offer_type?: string
-          price?: string | null
-          what_customer_gets?: string | null
-          why_do_it?: string | null
-          when_offered?: string | null
-          trigger?: string | null
-          sales_pitch?: string | null
-          thumbnail_url?: string | null
-          short_description?: string | null
-          video_url?: string | null
-          classroom_body?: string | null
-          sort_order?: number
-          is_active?: boolean
-          source?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "offers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      milestones: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          description: string | null
-          sort_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          description?: string | null
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          description?: string | null
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "milestones_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      milestone_offers: {
-        Row: {
-          milestone_id: string
-          offer_id: string
-          sequence: number
-          created_at: string
-        }
-        Insert: {
-          milestone_id: string
-          offer_id: string
-          sequence?: number
-          created_at?: string
-        }
-        Update: {
-          milestone_id?: string
-          offer_id?: string
-          sequence?: number
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "milestone_offers_milestone_id_fkey"
-            columns: ["milestone_id"]
-            isOneToOne: false
-            referencedRelation: "milestones"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "milestone_offers_offer_id_fkey"
-            columns: ["offer_id"]
-            isOneToOne: false
-            referencedRelation: "offers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crucible_team_members: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          position: string | null
-          phone: string | null
-          email: string | null
-          accountabilities: string[]
-          sort_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          position?: string | null
-          phone?: string | null
-          email?: string | null
-          accountabilities?: string[]
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          position?: string | null
-          phone?: string | null
-          email?: string | null
-          accountabilities?: string[]
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crucible_team_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crucible_appointments: {
-        Row: {
-          id: string
-          user_id: string
-          ghl_event_id: string | null
-          title: string
-          starts_at: string
-          ends_at: string | null
-          guests: string[]
-          meeting_link: string | null
-          notes: string | null
-          last_synced_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          ghl_event_id?: string | null
-          title: string
-          starts_at: string
-          ends_at?: string | null
-          guests?: string[]
-          meeting_link?: string | null
-          notes?: string | null
-          last_synced_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          ghl_event_id?: string | null
-          title?: string
-          starts_at?: string
-          ends_at?: string | null
-          guests?: string[]
-          meeting_link?: string | null
-          notes?: string | null
-          last_synced_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crucible_appointments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crucible_call_recordings: {
-        Row: {
-          id: string
-          user_id: string
-          appointment_id: string | null
-          title: string
-          call_date: string
-          zoom_recording_url: string | null
-          transcript_raw: string | null
-          transcript_segments: Json | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          appointment_id?: string | null
-          title: string
-          call_date: string
-          zoom_recording_url?: string | null
-          transcript_raw?: string | null
-          transcript_segments?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          appointment_id?: string | null
-          title?: string
-          call_date?: string
-          zoom_recording_url?: string | null
-          transcript_raw?: string | null
-          transcript_segments?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crucible_call_recordings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crucible_call_recordings_appointment_id_fkey"
-            columns: ["appointment_id"]
-            isOneToOne: false
-            referencedRelation: "crucible_appointments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crucible_tasks: {
-        Row: {
-          id: string
-          user_id: string
-          title: string
-          accountable_team_member_id: string | null
-          accountable_name: string | null
-          call_recording_id: string | null
-          status: string
-          sort_order: number
-          completed_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          title: string
-          accountable_team_member_id?: string | null
-          accountable_name?: string | null
-          call_recording_id?: string | null
-          status?: string
-          sort_order?: number
-          completed_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          accountable_team_member_id?: string | null
-          accountable_name?: string | null
-          call_recording_id?: string | null
-          status?: string
-          sort_order?: number
-          completed_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crucible_tasks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crucible_tasks_accountable_team_member_id_fkey"
-            columns: ["accountable_team_member_id"]
-            isOneToOne: false
-            referencedRelation: "crucible_team_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crucible_tasks_call_recording_id_fkey"
-            columns: ["call_recording_id"]
-            isOneToOne: false
-            referencedRelation: "crucible_call_recordings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crucible_rocks: {
-        Row: {
-          id: string
-          user_id: string
-          title: string
-          description: string | null
-          target_date: string | null
-          status: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          title: string
-          description?: string | null
-          target_date?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          description?: string | null
-          target_date?: string | null
-          status?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crucible_rocks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never

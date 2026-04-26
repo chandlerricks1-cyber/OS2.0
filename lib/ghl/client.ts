@@ -27,7 +27,7 @@ export interface GhlPipeline {
   stages: GhlStage[]
 }
 
-function getConfig() {
+export function getConfig() {
   const apiKey = process.env.GHL_API_KEY
   const locationId = process.env.GHL_LOCATION_ID
   if (!apiKey || !locationId) {
@@ -40,7 +40,10 @@ export function isGhlConfigured(): boolean {
   return !!(process.env.GHL_API_KEY && process.env.GHL_LOCATION_ID)
 }
 
-async function ghlFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
+export const GHL_API_BASE = API_BASE
+export const GHL_API_VERSION = API_VERSION
+
+export async function ghlFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const { apiKey } = getConfig()
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,

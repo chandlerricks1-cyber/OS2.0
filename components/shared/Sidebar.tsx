@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X, Shield, Mic, Users, Plug } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X, Shield, Mic, Users, Plug, MessageSquare, CalendarDays, KanbanSquare, Contact } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 
@@ -76,6 +76,26 @@ const adminNavItems = [
     icon: <Users className="w-[18px] h-[18px]" strokeWidth={1.5} />,
   },
   {
+    href: '/dashboard/admin/contacts',
+    label: 'Contacts',
+    icon: <Contact className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
+    href: '/dashboard/admin/conversations',
+    label: 'Conversations',
+    icon: <MessageSquare className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
+    href: '/dashboard/admin/opportunities',
+    label: 'Opportunities',
+    icon: <KanbanSquare className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
+    href: '/dashboard/admin/calendar',
+    label: 'Calendar',
+    icon: <CalendarDays className="w-[18px] h-[18px]" strokeWidth={1.5} />,
+  },
+  {
     href: '/dashboard/admin/integrations',
     label: 'Integrations',
     icon: <Plug className="w-[18px] h-[18px]" strokeWidth={1.5} />,
@@ -87,9 +107,10 @@ interface SidebarProps {
   onMobileClose?: () => void
   role?: string
   crucibleProStatus?: string | null
+  intakeIncomplete?: boolean
 }
 
-export function Sidebar({ mobileOpen = false, onMobileClose, role, crucibleProStatus }: SidebarProps) {
+export function Sidebar({ mobileOpen = false, onMobileClose, role, crucibleProStatus, intakeIncomplete }: SidebarProps) {
   const pathname = usePathname()
   const { collapsed, toggle } = useSidebarCollapsed()
 
@@ -170,13 +191,28 @@ export function Sidebar({ mobileOpen = false, onMobileClose, role, crucibleProSt
                 {isActive && !collapsed && (
                   <span className="absolute left-0 w-0.5 h-5 bg-brand-orange rounded-full" />
                 )}
-                <span className={isActive ? 'text-brand-orange' : ''}>{item.icon}</span>
+                <span className={`relative ${isActive ? 'text-brand-orange' : ''}`}>
+                  {item.icon}
+                  {item.href === '/intake' && intakeIncomplete && collapsed && (
+                    <span
+                      className="hidden md:block absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-brand-orange ring-2 ring-brand-dark"
+                      aria-label="Intake incomplete"
+                    />
+                  )}
+                </span>
                 <span className={collapsed ? 'md:hidden' : ''}>
                   {item.label}
                   {item.href === '/dashboard/crucible-pro' && crucibleProStatus === 'active' && (
                     <span className="ml-1.5 inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-brand-orange/20 text-brand-orange leading-none">
                       PRO
                     </span>
+                  )}
+                  {item.href === '/intake' && intakeIncomplete && (
+                    <span
+                      className="ml-2 inline-flex w-2 h-2 rounded-full bg-brand-orange align-middle"
+                      aria-label="Intake incomplete"
+                      title="Complete the intake chat for a fully accurate dashboard"
+                    />
                   )}
                 </span>
               </Link>

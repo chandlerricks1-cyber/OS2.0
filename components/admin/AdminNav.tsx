@@ -8,6 +8,10 @@ const navLinks = [
   { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/podcast', label: 'Podcast Leads' },
   { href: '/admin/clients', label: 'Clients' },
+  { href: '/admin/contacts', label: 'Contacts' },
+  { href: '/admin/conversations', label: 'Conversations' },
+  { href: '/admin/opportunities', label: 'Opportunities' },
+  { href: '/admin/calendar', label: 'Calendar' },
   { href: '/admin/integrations', label: 'Integrations' },
 ]
 
