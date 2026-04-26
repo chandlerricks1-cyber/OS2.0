@@ -1,4 +1,5 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 
@@ -30,8 +31,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (phone !== undefined) updates.phone = phone.trim()
     if (preferred_date !== undefined) updates.preferred_date = preferred_date
 
-    const admin = await createAdminClient()
-    const { error } = await admin
+    const { error } = await supabaseAdmin
       .from('podcast_leads')
       .update(updates)
       .eq('id', id)
@@ -54,20 +54,23 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const { id } = await params
-    const admin = await createAdminClient()
 
     // Delete related rows first (foreign keys may not cascade)
-    await admin.from('podcast_intake').delete().eq('lead_id', id)
-    await admin.from('podcast_lead_tags').delete().eq('lead_id', id)
+    await supabaseAdmin.from('podcast_intake').delete().eq('lead_id', id)
+    await supabaseAdmin.from('podcast_lead_tags').delete().eq('lead_id', id)
 
-    const { error } = await admin
+    const { error, count } = await supabaseAdmin
       .from('podcast_leads')
-      .delete()
+      .delete({ count: 'exact' })
       .eq('id', id)
 
     if (error) {
       console.error('Failed to delete lead:', error)
       return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+    }
+
+    if (!count) {
+      return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     }
 
     revalidatePath('/dashboard/admin/podcast')

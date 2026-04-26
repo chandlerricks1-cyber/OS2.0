@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function DELETE(request: Request) {
   const supabase = await createClient()
@@ -16,10 +17,8 @@ export async function DELETE(request: Request) {
     )
   }
 
-  const adminClient = await createAdminClient()
-
   // Delete user from auth (cascades clean up profiles and related tables)
-  const { error } = await adminClient.auth.admin.deleteUser(user.id)
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id)
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

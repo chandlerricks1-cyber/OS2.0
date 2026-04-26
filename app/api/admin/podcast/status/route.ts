@@ -1,4 +1,5 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 const VALID_STATUSES = ['new', 'intake_complete', 'scheduled', 'recorded', 'archived']
@@ -34,8 +35,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }, { status: 400 })
     }
 
-    const admin = await createAdminClient()
-    const { error } = await admin
+    const { error } = await supabaseAdmin
       .from('podcast_leads')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', lead_id)

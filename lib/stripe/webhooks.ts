@@ -1,5 +1,5 @@
 import { stripe } from './client'
-import { createAdminClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function handleStripeWebhook(body: string, signature: string) {
   let event: import('stripe').Stripe.Event
@@ -14,7 +14,7 @@ export async function handleStripeWebhook(body: string, signature: string) {
     throw new Error(`Webhook signature verification failed: ${err}`)
   }
 
-  const supabase = await createAdminClient()
+  const supabase = supabaseAdmin
 
   switch (event.type) {
     case 'checkout.session.completed': {

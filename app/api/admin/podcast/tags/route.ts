@@ -1,4 +1,5 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 async function verifyAdmin() {
@@ -24,8 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'lead_id and tag are required' }, { status: 400 })
     }
 
-    const admin = await createAdminClient()
-    const { error } = await admin
+    const { error } = await supabaseAdmin
       .from('podcast_lead_tags')
       .insert({ lead_id, tag: tag.trim(), created_by: user.id })
 
@@ -54,8 +54,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'lead_id and tag are required' }, { status: 400 })
     }
 
-    const admin = await createAdminClient()
-    const { error } = await admin
+    const { error } = await supabaseAdmin
       .from('podcast_lead_tags')
       .delete()
       .eq('lead_id', lead_id)
