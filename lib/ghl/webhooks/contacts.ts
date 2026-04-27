@@ -1,11 +1,18 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { Database } from '@/types/database'
-import type { GhlContact } from '../contacts'
+import { getContact, type GhlContact } from '../contacts'
 
 type GhlContactRow = Database['public']['Tables']['ghl_contacts']['Insert']
 
-interface ContactPayload extends GhlContact {
-  type?: string
+// GHL Workflow webhooks send snake_case fields; REST API + our backfill use camelCase.
+// Accept either shape.
+interface ContactPayload {
+  // REST shape
+  id?: string
+  // Workflow shape
+  contact_id?: string
+  // any other fields we might inspect
+  [k: string]: unknown
 }
 
 export function mapContactRow(c: GhlContact): GhlContactRow {
@@ -60,23 +67,22 @@ export async function softDeleteGhlContact(ghlId: string) {
 }
 
 export async function handleContactWebhook(eventType: string, payload: ContactPayload) {
-  const id = payload.id
-  if (!id) throw new Error('contact webhook missing id')
+  const id = (payload.id as string | undefined) ?? (payload.contact_id as string | undefined)
+  if (!id) throw new Error('contact webhook missing contact id')
 
-  switch (eventType) {
-    case 'ContactCreate':
-    case 'ContactUpdate':
-    case 'ContactTagUpdate':
-    case 'ContactDndUpdate':
-      await upsertGhlContact(payload)
-      return
-    case 'ContactDelete':
-      await softDeleteGhlContact(id)
-      return
-    default:
-      // unknown contact event — store raw via upsert if shape looks contact-like
-      if (payload.email || payload.phone || payload.firstName) {
-        await upsertGhlContact(payload)
-      }
+  if (eventType === 'ContactDelete') {
+    await softDeleteGhlContact(id)
+    return
+  }
+
+  // For everything else (Create/Update/Tag/Dnd/etc), the webhook payload is sparse
+  // and shape varies (REST vs Workflow). Fetch the canonical record from GHL and
+  // upsert that — one mapper, one source of truth.
+  const fresh = await getContact(id)
+  if (fresh) {
+    await upsertGhlContact(fresh)
+  } else {
+    // Contact no longer exists in GHL — treat as soft delete.
+    await softDeleteGhlContact(id)
   }
 }

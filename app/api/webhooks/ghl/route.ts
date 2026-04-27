@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { verifyGhlSignature } from '@/lib/ghl/webhook-verify'
@@ -7,18 +8,39 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 interface WebhookPayload {
+  // GHL REST-style fields
   type?: string
   webhookId?: string
   id?: string
+  // GHL Workflow-action fields
+  contact_id?: string
+  workflow?: { id?: string; name?: string }
   locationId?: string
   [k: string]: unknown
 }
 
-function deriveEventId(payload: WebhookPayload): string {
-  // Prefer GHL-provided webhookId; fall back to type+id+timestamp.
+function deriveEventType(payload: WebhookPayload): string {
+  // 1. Native REST event with explicit type.
+  if (typeof payload.type === 'string' && payload.type) return payload.type
+  // 2. Workflow webhook — convention: workflow name contains "(OS-EventName)".
+  const wfName = payload.workflow?.name
+  if (typeof wfName === 'string') {
+    const match = wfName.match(/OS-([A-Za-z]+)/)
+    if (match) return match[1]
+  }
+  return 'unknown'
+}
+
+function deriveEventId(payload: WebhookPayload, eventType: string, rawBody: string): string {
   if (typeof payload.webhookId === 'string' && payload.webhookId) return payload.webhookId
+  const wfId = payload.workflow?.id ?? ''
+  const subjectId = payload.id ?? payload.contact_id ?? ''
+  if (wfId && subjectId) {
+    const bodyHash = crypto.createHash('sha256').update(rawBody).digest('hex').slice(0, 12)
+    return `wf:${wfId}:${subjectId}:${bodyHash}`
+  }
   const ts = (payload.dateUpdated as string | undefined) ?? new Date().toISOString()
-  return `${payload.type ?? 'unknown'}:${payload.id ?? 'noid'}:${ts}`
+  return `${eventType}:${subjectId || 'noid'}:${ts}`
 }
 
 export async function POST(req: NextRequest) {
@@ -43,8 +65,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid json' }, { status: 400 })
   }
 
-  const eventId = deriveEventId(payload)
-  const eventType = (payload.type as string) ?? 'unknown'
+  const eventType = deriveEventType(payload)
+  const eventId = deriveEventId(payload, eventType, rawBody)
 
   // Idempotency: insert into log; on conflict do nothing means we've seen it.
   const { error: insertErr, data: inserted } = await supabaseAdmin
