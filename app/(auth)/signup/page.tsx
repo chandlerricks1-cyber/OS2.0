@@ -12,7 +12,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [confirmSent, setConfirmSent] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -26,13 +25,10 @@ export default function SignupPage() {
     }
 
     const supabase = createClient()
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/intake`,
-      },
+      options: { data: { full_name: fullName } },
     })
 
     if (signUpError) {
@@ -41,43 +37,19 @@ export default function SignupPage() {
       return
     }
 
-    // Ensure a session exists so middleware lets them into /intake,
-    // even if "Confirm email" is enabled in Supabase.
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (signInError) {
-      setError(signInError.message)
-      setLoading(false)
-      return
+    // Fallback: if "Confirm email" is still on in Supabase, signUp returns no
+    // session — sign in directly so middleware lets them into /intake.
+    if (!data.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) {
+        setError(signInError.message)
+        setLoading(false)
+        return
+      }
     }
 
-    setConfirmSent(true)
-    setLoading(false)
-    setTimeout(() => {
-      router.push('/intake')
-      router.refresh()
-    }, 2000)
-  }
-
-  if (confirmSent) {
-    return (
-      <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
-        <h1 className="text-2xl font-black text-brand-dark tracking-tight">Check your email</h1>
-        <p className="text-gray-600 mt-3 text-sm">
-          We sent a confirmation link to <span className="font-semibold">{email}</span>. You can
-          confirm later — taking you to your free analysis now…
-        </p>
-        <button
-          onClick={() => {
-            router.push('/intake')
-            router.refresh()
-          }}
-          className="mt-6 w-full bg-brand-orange hover:bg-brand-orange-dark text-white rounded-lg px-4 py-3 text-sm font-bold transition-colors"
-        >
-          Continue to intake →
-        </button>
-      </div>
-    )
+    router.push('/intake')
+    router.refresh()
   }
 
   return (
