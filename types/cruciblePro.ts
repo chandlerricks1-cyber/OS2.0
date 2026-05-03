@@ -90,7 +90,39 @@ export interface BillingSnapshot {
   status: string
   plan_type: string | null
   stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  stripe_product_id: string | null
+  stripe_price_id: string | null
   has_stripe_subscription: boolean
+}
+
+export const INVOICE_TYPES = ['subscription_cycle', 'one_off'] as const
+export type InvoiceType = (typeof INVOICE_TYPES)[number]
+
+export const INVOICE_STATUSES = ['draft', 'open', 'paid', 'void', 'uncollectible'] as const
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
+
+export interface Invoice {
+  id: string
+  user_id: string
+  stripe_invoice_id: string
+  stripe_subscription_id: string | null
+  stripe_customer_id: string | null
+  invoice_type: InvoiceType
+  amount_cents: number
+  currency: string
+  status: InvoiceStatus
+  description: string | null
+  hosted_invoice_url: string | null
+  invoice_pdf_url: string | null
+  number: string | null
+  finalized_at: string | null
+  sent_at: string | null
+  paid_at: string | null
+  voided_at: string | null
+  due_date: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface ClientOption {

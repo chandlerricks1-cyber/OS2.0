@@ -327,6 +327,86 @@ export type Database = {
           },
         ]
       }
+      crucible_pro_invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string | null
+          due_date: string | null
+          finalized_at: string | null
+          hosted_invoice_url: string | null
+          id: string
+          invoice_pdf_url: string | null
+          invoice_type: string
+          metadata: Json
+          number: string | null
+          paid_at: string | null
+          sent_at: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_invoice_id: string
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+          voided_at: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_date?: string | null
+          finalized_at?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          invoice_type: string
+          metadata?: Json
+          number?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          status: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+          voided_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_date?: string | null
+          finalized_at?: string | null
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf_url?: string | null
+          invoice_type?: string
+          metadata?: Json
+          number?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+          voided_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crucible_pro_invoices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crucible_rocks: {
         Row: {
           created_at: string
@@ -1497,6 +1577,7 @@ export type Database = {
           status: string
           stripe_customer_id: string | null
           stripe_price_id: string | null
+          stripe_product_id: string | null
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
@@ -1512,6 +1593,7 @@ export type Database = {
           status?: string
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
@@ -1527,6 +1609,7 @@ export type Database = {
           status?: string
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string

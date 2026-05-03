@@ -10,6 +10,7 @@ import type {
   Task,
   TeamMember,
   BillingSnapshot,
+  Invoice,
 } from '@/types/cruciblePro'
 
 const VALID_TABS = new Set(['appointments', 'recordings', 'goals', 'billing'])
@@ -65,6 +66,7 @@ export default async function CrucibleProPage({
     { data: rocks },
     { data: metrics },
     { data: subscription },
+    { data: invoices },
   ] = await Promise.all([
     supabase
       .from('crucible_appointments')
@@ -100,10 +102,16 @@ export default async function CrucibleProPage({
     supabase
       .from('subscriptions')
       .select(
-        'monthly_consulting_fee, client_agreement_url, next_billing_date, current_period_end, status, plan_type, stripe_customer_id, stripe_subscription_id'
+        'monthly_consulting_fee, client_agreement_url, next_billing_date, current_period_end, status, plan_type, stripe_customer_id, stripe_subscription_id, stripe_product_id, stripe_price_id'
       )
       .eq('user_id', targetUserId)
       .maybeSingle(),
+    supabase
+      .from('crucible_pro_invoices')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ])
 
   // Resolve client display name for accountability assignment
@@ -125,6 +133,9 @@ export default async function CrucibleProPage({
     status: subscription?.status ?? 'inactive',
     plan_type: subscription?.plan_type ?? null,
     stripe_customer_id: subscription?.stripe_customer_id ?? null,
+    stripe_subscription_id: subscription?.stripe_subscription_id ?? null,
+    stripe_product_id: subscription?.stripe_product_id ?? null,
+    stripe_price_id: subscription?.stripe_price_id ?? null,
     has_stripe_subscription: Boolean(subscription?.stripe_subscription_id),
   }
 
@@ -145,6 +156,7 @@ export default async function CrucibleProPage({
       rocks={(rocks as Rock[] | null) ?? []}
       revenueGoal={revenueGoal}
       billing={billing}
+      invoices={(invoices as Invoice[] | null) ?? []}
     />
   )
 }

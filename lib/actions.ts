@@ -4,6 +4,26 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import {
+  ensureStripeCustomer,
+  ensureMonthlyPrice,
+  createSubscriptionCheckoutSession,
+  updateActiveSubscriptionPrice,
+  sendOneOffInvoice,
+} from '@/lib/stripe/retainer'
+
+async function requireAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'admin') throw new Error('Forbidden')
+  return user
+}
 
 export async function addClientTag(userId: string, tag: string) {
   const supabase = await createClient()
@@ -240,6 +260,107 @@ export async function updateRevenueGoal(targetUserId: string, goal: number) {
   if (error) throw new Error(`Failed to update revenue goal: ${error.message}`)
 
   revalidatePath('/dashboard/crucible-pro')
+}
+
+export async function setMonthlyRetainerFee(userId: string, amountUsd: number | null) {
+  await requireAdmin()
+
+  const normalized =
+    amountUsd === null || amountUsd === undefined || Number.isNaN(amountUsd)
+      ? null
+      : Number(amountUsd)
+  if (normalized !== null && (!Number.isFinite(normalized) || normalized < 0)) {
+    throw new Error('Retainer must be a non-negative number')
+  }
+
+  const { data: existing, error: loadError } = await supabaseAdmin
+    .from('subscriptions')
+    .select('stripe_customer_id, stripe_subscription_id, status')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (loadError) throw new Error(`Failed to load subscription: ${loadError.message}`)
+
+  const { error: updateError } = await supabaseAdmin
+    .from('subscriptions')
+    .update({
+      monthly_consulting_fee: normalized,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+  if (updateError) throw new Error(`Failed to update retainer: ${updateError.message}`)
+
+  // If a Stripe customer already exists and the new amount is non-null, sync
+  // a Stripe Price under the client's Product. Push the new price to the
+  // active subscription if there is one (effective next billing cycle).
+  if (normalized !== null && normalized > 0 && existing?.stripe_customer_id) {
+    const { priceId } = await ensureMonthlyPrice(userId, normalized)
+    if (existing.stripe_subscription_id && existing.status === 'active') {
+      await updateActiveSubscriptionPrice(userId, priceId)
+    }
+  }
+
+  revalidatePath(`/dashboard/admin/clients/${userId}`)
+  revalidatePath('/dashboard/crucible-pro')
+}
+
+export async function startRetainerSubscription(userId: string): Promise<{ url: string }> {
+  await requireAdmin()
+  const { url } = await createSubscriptionCheckoutSession(userId)
+  revalidatePath(`/dashboard/admin/clients/${userId}`)
+  revalidatePath('/dashboard/crucible-pro')
+  return { url }
+}
+
+export async function sendRetainerOneOffInvoice(
+  userId: string,
+  amountUsd: number,
+  description: string
+): Promise<{ hostedUrl: string | null; invoiceId: string }> {
+  await requireAdmin()
+
+  await ensureStripeCustomer(userId)
+  const invoice = await sendOneOffInvoice(userId, amountUsd, description)
+
+  const amountCents =
+    typeof invoice.amount_due === 'number' && invoice.amount_due > 0
+      ? invoice.amount_due
+      : Math.round(amountUsd * 100)
+
+  // Insert immediately so the in-app history reflects the action even before
+  // the webhook fires. Webhook handlers upsert on stripe_invoice_id.
+  const { error: insertError } = await supabaseAdmin
+    .from('crucible_pro_invoices')
+    .upsert(
+      {
+        user_id: userId,
+        stripe_invoice_id: invoice.id,
+        stripe_customer_id: typeof invoice.customer === 'string' ? invoice.customer : null,
+        stripe_subscription_id: null,
+        invoice_type: 'one_off',
+        amount_cents: amountCents,
+        currency: invoice.currency ?? 'usd',
+        status: invoice.status ?? 'open',
+        description: description.trim(),
+        hosted_invoice_url: invoice.hosted_invoice_url ?? null,
+        invoice_pdf_url: invoice.invoice_pdf ?? null,
+        number: invoice.number ?? null,
+        finalized_at: invoice.status_transitions?.finalized_at
+          ? new Date(invoice.status_transitions.finalized_at * 1000).toISOString()
+          : null,
+        sent_at: new Date().toISOString(),
+        due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
+        metadata: { source: 'sendRetainerOneOffInvoice' },
+      },
+      { onConflict: 'stripe_invoice_id' }
+    )
+  if (insertError) {
+    throw new Error(`Invoice sent on Stripe but failed to record locally: ${insertError.message}`)
+  }
+
+  revalidatePath(`/dashboard/admin/clients/${userId}`)
+  revalidatePath('/dashboard/crucible-pro')
+
+  return { hostedUrl: invoice.hosted_invoice_url ?? null, invoiceId: invoice.id }
 }
 
 export async function revokeCrucibleProAccess(userId: string) {

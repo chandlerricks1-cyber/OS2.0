@@ -11,11 +11,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Only admins can edit billing fields.' }, { status: 403 })
   }
 
+  // monthly_consulting_fee is intentionally NOT handled here — it's set via
+  // the setMonthlyRetainerFee server action so Stripe Product/Price stays in sync.
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
-  if ('monthly_consulting_fee' in body) {
-    const n = Number(body.monthly_consulting_fee)
-    updates.monthly_consulting_fee = Number.isFinite(n) ? n : null
-  }
   if ('client_agreement_url' in body) updates.client_agreement_url = body.client_agreement_url || null
   if ('next_billing_date' in body) updates.next_billing_date = body.next_billing_date || null
 

@@ -4,6 +4,9 @@ import { formatCurrency, formatMonths, formatPercent } from '@/lib/utils/metrics
 import Link from 'next/link'
 import { GrantProButton } from '@/components/admin/GrantProButton'
 import { ClientDeleteButton } from '@/components/admin/ClientDeleteButton'
+import { RetainerPanel } from '@/components/admin/RetainerPanel'
+import { InvoiceHistoryList } from '@/components/crucible-pro/InvoiceHistoryList'
+import type { Invoice } from '@/types/cruciblePro'
 
 export default async function ClientDetailPage({
   params,
@@ -31,12 +34,19 @@ export default async function ClientDetailPage({
     { data: subscription },
     { data: tags },
     { data: session },
+    { data: invoices },
   ] = await Promise.all([
     adminSupabase.from('profiles').select('*').eq('id', id).single(),
     adminSupabase.from('business_metrics').select('*').eq('user_id', id).single(),
     adminSupabase.from('subscriptions').select('*').eq('user_id', id).single(),
     adminSupabase.from('client_tags').select('tag').eq('user_id', id),
     adminSupabase.from('intake_sessions').select('id, status, started_at, completed_at').eq('user_id', id).single(),
+    adminSupabase
+      .from('crucible_pro_invoices')
+      .select('*')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ])
 
   if (!profile) notFound()
@@ -137,6 +147,17 @@ export default async function ClientDetailPage({
           />
         </div>
       </div>
+
+      {/* Retainer + invoicing (admin) */}
+      <RetainerPanel
+        userId={profile.id}
+        monthlyFee={subscription?.monthly_consulting_fee ?? null}
+        subscriptionStatus={subscription?.status ?? null}
+        hasStripeSubscription={Boolean(subscription?.stripe_subscription_id)}
+        currentPeriodEnd={subscription?.current_period_end ?? null}
+      />
+
+      <InvoiceHistoryList invoices={(invoices as Invoice[] | null) ?? []} />
 
       {/* Metrics */}
       {metrics && (

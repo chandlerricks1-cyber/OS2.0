@@ -13,6 +13,7 @@ import type {
   BillingSnapshot,
   CallRecording,
   ClientOption,
+  Invoice,
   Rock,
   Task,
   TeamMember,
@@ -43,6 +44,7 @@ export function CrucibleProShell({
   rocks,
   revenueGoal,
   billing,
+  invoices,
 }: {
   isAdmin: boolean
   clients: ClientOption[]
@@ -56,6 +58,7 @@ export function CrucibleProShell({
   rocks: Rock[]
   revenueGoal: number | null
   billing: BillingSnapshot
+  invoices: Invoice[]
 }) {
   const router = useRouter()
   const [tab, setTab] = useState<TabId>(initialTab)
@@ -145,7 +148,14 @@ export function CrucibleProShell({
           isAdmin={isAdmin}
         />
       )}
-      {tab === 'billing' && <BillingTab billing={billing} targetUserId={targetUserId} isAdmin={isAdmin} />}
+      {tab === 'billing' && (
+        <BillingTab
+          billing={billing}
+          invoices={invoices}
+          targetUserId={targetUserId}
+          isAdmin={isAdmin}
+        />
+      )}
     </div>
   )
 }
