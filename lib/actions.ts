@@ -252,12 +252,20 @@ export async function updateRevenueGoal(targetUserId: string, goal: number) {
   if (user.id !== targetUserId && !isAdmin) throw new Error('Forbidden')
 
   const client = isAdmin ? supabaseAdmin : supabase
-  const { error } = await client
+  const { data, error } = await client
     .from('business_metrics')
-    .update({ revenue_goal_1yr: goal, updated_at: new Date().toISOString() })
-    .eq('user_id', targetUserId)
+    .upsert(
+      {
+        user_id: targetUserId,
+        revenue_goal_1yr: goal,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+    .select('id')
 
   if (error) throw new Error(`Failed to update revenue goal: ${error.message}`)
+  if (!data || data.length === 0) throw new Error('Failed to update revenue goal: no row written')
 
   revalidatePath('/dashboard/crucible-pro')
 }
