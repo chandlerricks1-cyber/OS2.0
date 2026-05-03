@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ComingSoon } from '@/components/admin/ComingSoon'
+import { ConversationsApp } from '@/components/admin/conversations/ConversationsApp'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +16,8 @@ export default async function AdminConversationsPage() {
   if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
   return (
-    <ComingSoon
-      title="Conversations"
-      description="SMS, Email, FB Messenger, Instagram DM — synced from GoHighLevel"
-      phase="Phase 2"
-    />
+    <div className="-m-4 sm:-m-6 lg:-m-8 h-[calc(100vh-4rem)] sm:h-[calc(100vh-4rem)]">
+      <ConversationsApp />
+    </div>
   )
 }

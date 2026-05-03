@@ -470,7 +470,7 @@ function BackfillCard() {
         {BACKFILL_ENTITIES.map((entity) => {
           const s = status?.entities?.[entity]
           const isRunning = !!running[entity]
-          const supported = entity === 'contacts'
+          const supported = entity === 'contacts' || entity === 'conversations'
           return (
             <li key={entity} className="py-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">

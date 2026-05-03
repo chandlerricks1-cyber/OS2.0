@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { isGhlConfigured } from '@/lib/ghl/client'
 import { searchContactsPage } from '@/lib/ghl/contacts'
 import { mapContactRow } from '@/lib/ghl/webhooks/contacts'
+import { searchConversationsPage, getMessages } from '@/lib/ghl/conversations'
+import { mapConversationRow, mapMessageRow } from '@/lib/ghl/webhooks/conversations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -44,6 +46,78 @@ async function writeState(entity: Entity, value: BackfillState) {
       value: value as unknown as never,
       updated_at: new Date().toISOString(),
     })
+}
+
+async function backfillConversations(state: BackfillState | null): Promise<BackfillState> {
+  let cursor = state?.cursor ?? null
+  let synced = state?.syncedCount ?? 0
+  let total = state?.total ?? null
+  const startedAt = state?.startedAt ?? new Date().toISOString()
+
+  for (let i = 0; i < 4; i++) {
+    const page = await searchConversationsPage({ limit: 50, startAfterDate: cursor })
+    if (total === null && page.total !== null) total = page.total
+
+    if (page.items.length === 0) {
+      return {
+        cursor: null,
+        done: true,
+        syncedCount: synced,
+        total,
+        startedAt,
+        updatedAt: new Date().toISOString(),
+        lastError: null,
+      }
+    }
+
+    const convRows = page.items.map(mapConversationRow)
+    const { error: convErr } = await supabaseAdmin
+      .from('ghl_conversations')
+      .upsert(convRows, { onConflict: 'ghl_id' })
+    if (convErr) throw new Error(`upsert ghl_conversations failed: ${convErr.message}`)
+
+    // Pull last 30 messages per conversation
+    for (const conv of page.items) {
+      try {
+        const { messages } = await getMessages(conv.id, { limit: 30 })
+        if (messages.length === 0) continue
+        const rows = messages.map((m) =>
+          mapMessageRow(m, { conversationId: conv.id, contactId: conv.contactId ?? null })
+        )
+        const { error: msgErr } = await supabaseAdmin
+          .from('ghl_messages')
+          .upsert(rows, { onConflict: 'ghl_id' })
+        if (msgErr) throw new Error(`upsert ghl_messages failed: ${msgErr.message}`)
+      } catch (err) {
+        console.warn('[backfill conv messages]', conv.id, err)
+      }
+    }
+
+    synced += page.items.length
+    cursor = page.nextCursor
+
+    if (!cursor) {
+      return {
+        cursor: null,
+        done: true,
+        syncedCount: synced,
+        total,
+        startedAt,
+        updatedAt: new Date().toISOString(),
+        lastError: null,
+      }
+    }
+  }
+
+  return {
+    cursor,
+    done: false,
+    syncedCount: synced,
+    total,
+    startedAt,
+    updatedAt: new Date().toISOString(),
+    lastError: null,
+  }
 }
 
 async function backfillContacts(state: BackfillState | null): Promise<BackfillState> {
@@ -117,11 +191,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ entity: st
       case 'contacts':
         nextState = await backfillContacts(prevState)
         break
+      case 'conversations':
+        nextState = await backfillConversations(prevState)
+        break
       case 'pipelines':
       case 'opportunities':
       case 'calendars':
       case 'appointments':
-      case 'conversations':
         return NextResponse.json(
           { error: `backfill for ${entity} ships in a later phase` },
           { status: 501 }

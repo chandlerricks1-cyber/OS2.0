@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { verifyGhlSignature } from '@/lib/ghl/webhook-verify'
 import { handleContactWebhook } from '@/lib/ghl/webhooks/contacts'
+import { handleConversationWebhook } from '@/lib/ghl/webhooks/conversations'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -108,7 +109,15 @@ async function routeEvent(eventType: string, payload: WebhookPayload) {
     await handleContactWebhook(eventType, payload as never)
     return
   }
-  // Conversation/Calendar/Opportunity handlers added in later phases.
+  if (
+    eventType === 'InboundMessage' ||
+    eventType === 'OutboundMessage' ||
+    eventType === 'ConversationUnreadUpdate'
+  ) {
+    await handleConversationWebhook(eventType, payload as never)
+    return
+  }
+  // Calendar/Opportunity handlers ship in later phases.
   // For now, log + ack so we don't lose the event.
   console.log('[ghl webhook] queued (no handler yet):', eventType, payload.id)
 }
