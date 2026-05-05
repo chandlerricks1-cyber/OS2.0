@@ -42,13 +42,34 @@ function pick<T>(...values: (T | undefined | null)[]): T | undefined {
   return undefined
 }
 
+// GHL returns timestamps as either ISO strings or epoch ms (number or numeric string).
+function toIsoTimestamp(v: unknown): string | null {
+  if (v === undefined || v === null || v === '') return null
+  if (typeof v === 'number') {
+    const ms = v < 1e12 ? v * 1000 : v // seconds vs ms
+    const d = new Date(ms)
+    return Number.isNaN(d.getTime()) ? null : d.toISOString()
+  }
+  if (typeof v === 'string') {
+    if (/^\d+$/.test(v)) {
+      const n = Number(v)
+      const ms = n < 1e12 ? n * 1000 : n
+      const d = new Date(ms)
+      return Number.isNaN(d.getTime()) ? null : d.toISOString()
+    }
+    const d = new Date(v)
+    return Number.isNaN(d.getTime()) ? null : d.toISOString()
+  }
+  return null
+}
+
 export function mapConversationRow(c: GhlConversation): ConversationRow {
   return {
     ghl_id: c.id,
     contact_id: c.contactId ?? null,
     last_message_type: normalizeMessageType(c.lastMessageType ?? null),
     last_message_body: c.lastMessageBody ?? null,
-    last_message_at: c.lastMessageDate ?? null,
+    last_message_at: toIsoTimestamp(c.lastMessageDate),
     unread_count: c.unreadCount ?? 0,
     inbox_status: c.type ?? null,
     assigned_to: c.assignedTo ?? null,
@@ -74,7 +95,7 @@ export function mapMessageRow(m: GhlMessage, opts: { conversationId: string; con
     attachments: attachments as never,
     from_addr: (m as { from?: string }).from ?? null,
     to_addr: (m as { to?: string }).to ?? null,
-    message_at: m.dateAdded ?? new Date().toISOString(),
+    message_at: toIsoTimestamp(m.dateAdded) ?? new Date().toISOString(),
     meta: (m.meta as never) ?? null,
     synced_at: new Date().toISOString(),
   }

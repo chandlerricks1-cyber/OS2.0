@@ -164,17 +164,29 @@ export default async function CrucibleProPage({
 function extractRevenueGoal(metrics: unknown): number | null {
   if (!metrics || typeof metrics !== 'object') return null
   const m = metrics as Record<string, unknown>
-  // Explicit override takes priority
-  if (typeof m.revenue_goal_1yr === 'number') return m.revenue_goal_1yr
+  // Explicit override takes priority. Postgres numeric columns come back as
+  // strings via supabase-js, so coerce before checking.
+  const explicit = toFiniteNumber(m.revenue_goal_1yr)
+  if (explicit !== null) return explicit
   // Fallback to intake-derived values
-  if (typeof m.required_30_day_revenue === 'number') {
-    return m.required_30_day_revenue * 12
-  }
+  const required30 = toFiniteNumber(m.required_30_day_revenue)
+  if (required30 !== null) return required30 * 12
   const raw = m.raw_extraction
   if (raw && typeof raw === 'object') {
     const r = raw as Record<string, unknown>
-    if (typeof r.annual_revenue_goal === 'number') return r.annual_revenue_goal
-    if (typeof r.revenue_goal === 'number') return r.revenue_goal
+    const annual = toFiniteNumber(r.annual_revenue_goal)
+    if (annual !== null) return annual
+    const goal = toFiniteNumber(r.revenue_goal)
+    if (goal !== null) return goal
+  }
+  return null
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
   }
   return null
 }
