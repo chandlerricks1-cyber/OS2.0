@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import Script from 'next/script'
 import { Logo } from '@/components/shared/Logo'
-import { Star, Plus, Minus, ChevronRight } from 'lucide-react'
+import { Star, Plus, Minus, ChevronRight, X } from 'lucide-react'
 
-const BOOKING_URL = '#book'
+const BOOKING_IFRAME_SRC = 'https://start.cruciblecoaching.org/widget/booking/n6ep2x22ahM8EnsfIsKk'
+const BOOKING_IFRAME_ID = 'n6ep2x22ahM8EnsfIsKk_1778162284873'
 
 const rotatingPhrases = [
   'Stop waiting on mortgage companies',
@@ -122,6 +123,7 @@ const faqs = [
 export default function MortgageHoldsPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [phraseIdx, setPhraseIdx] = useState(0)
+  const [bookingOpen, setBookingOpen] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -129,6 +131,20 @@ export default function MortgageHoldsPage() {
     }, 3000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!bookingOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setBookingOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [bookingOpen])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -165,14 +181,13 @@ export default function MortgageHoldsPage() {
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
               className="btn-gradient text-sm px-5 py-2.5"
             >
               Book Your Call
-            </a>
+            </button>
           </div>
         </div>
       </nav>
@@ -215,14 +230,13 @@ export default function MortgageHoldsPage() {
           </p>
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
               className="btn-gradient px-10 py-4 text-base"
             >
               Book Your Call to Start
-            </a>
+            </button>
             <a
               href="#how-it-works"
               className="text-page-muted hover:text-page-dark px-6 py-4 font-medium text-base transition-colors flex items-center gap-1"
@@ -405,14 +419,13 @@ export default function MortgageHoldsPage() {
             One call. One week of setup. A lifetime of same-day deposits. No more chasing mortgage companies,
             no more certified mail, no more waiting to get paid for work you already finished.
           </p>
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => setBookingOpen(true)}
             className="btn-gradient px-12 py-4 text-lg"
           >
             Book Your Call to Start
-          </a>
+          </button>
           <p className="text-sm text-gray-500 mt-6">
             $3,000 one-time setup — no recurring fees, no per-check charges
           </p>
@@ -441,6 +454,43 @@ export default function MortgageHoldsPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── Booking Modal ────────────────────────────── */}
+      {bookingOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-3 py-6 sm:px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Book a call with Crucible"
+        >
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setBookingOpen(false)}
+          />
+          <div className="relative w-full max-w-3xl h-[90vh] bg-white rounded-[20px] shadow-elevated overflow-hidden flex flex-col">
+            <button
+              type="button"
+              onClick={() => setBookingOpen(false)}
+              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-card-soft flex items-center justify-center text-page-dark transition-colors"
+              aria-label="Close booking"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <iframe
+              src={BOOKING_IFRAME_SRC}
+              id={BOOKING_IFRAME_ID}
+              title="Book a call with Crucible"
+              className="w-full h-full border-0"
+              scrolling="no"
+            />
+          </div>
+        </div>
+      )}
+
+      <Script
+        src="https://start.cruciblecoaching.org/js/form_embed.js"
+        strategy="lazyOnload"
+      />
     </div>
   )
 }
