@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/podcast') ||
     pathname.startsWith('/brand-script') ||
     pathname.startsWith('/api/brand-script') ||
+    pathname.startsWith('/mortgage-holds') ||
     pathname.startsWith('/api/webhooks/')
   if (isPublic) {
     // Redirect logged-in users away from auth pages
