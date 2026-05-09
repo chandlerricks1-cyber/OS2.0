@@ -1502,6 +1502,8 @@ export type Database = {
           ghl_contact_id: string | null
           id: string
           phone: string | null
+          public_share_enabled: boolean
+          public_share_slug: string | null
           role: string
           updated_at: string
         }
@@ -1515,6 +1517,8 @@ export type Database = {
           ghl_contact_id?: string | null
           id: string
           phone?: string | null
+          public_share_enabled?: boolean
+          public_share_slug?: string | null
           role?: string
           updated_at?: string
         }
@@ -1528,6 +1532,8 @@ export type Database = {
           ghl_contact_id?: string | null
           id?: string
           phone?: string | null
+          public_share_enabled?: boolean
+          public_share_slug?: string | null
           role?: string
           updated_at?: string
         }

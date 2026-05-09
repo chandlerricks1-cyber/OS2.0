@@ -1,6 +1,8 @@
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { MoneyModelTabs } from '@/components/money-model/MoneyModelTabs'
+import { ShareLinkButton } from '@/components/money-model/ShareLinkButton'
 import type { Offer, Milestone, MilestoneOffer } from '@/types/offer'
 
 export default async function MoneyModelPage({
@@ -71,7 +73,7 @@ export default async function MoneyModelPage({
     }
   }
 
-  const [{ data: milestones }, { data: links }] = await Promise.all([
+  const [{ data: milestones }, { data: links }, { data: profile }] = await Promise.all([
     supabase
       .from('milestones')
       .select('*')
@@ -80,7 +82,17 @@ export default async function MoneyModelPage({
     supabase
       .from('milestone_offers')
       .select('milestone_id, offer_id, sequence'),
+    supabase
+      .from('profiles')
+      .select('public_share_slug, public_share_enabled')
+      .eq('id', user.id)
+      .single(),
   ])
+
+  const reqHeaders = await headers()
+  const host = reqHeaders.get('host') ?? 'localhost:3000'
+  const proto = reqHeaders.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? `${proto}://${host}`
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -91,6 +103,13 @@ export default async function MoneyModelPage({
             Organize your offers, map the customer journey, and build your classroom library.
           </p>
         </div>
+        <ShareLinkButton
+          initial={{
+            slug: profile?.public_share_slug ?? null,
+            enabled: profile?.public_share_enabled ?? false,
+          }}
+          baseUrl={baseUrl}
+        />
       </div>
 
       <MoneyModelTabs

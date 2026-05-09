@@ -70,7 +70,7 @@ async function backfillConversations(state: BackfillState | null): Promise<Backf
       }
     }
 
-    const convRows = page.items.map(mapConversationRow)
+    const convRows = page.items.map((c) => mapConversationRow(c))
     const { error: convErr } = await supabaseAdmin
       .from('ghl_conversations')
       .upsert(convRows, { onConflict: 'ghl_id' })

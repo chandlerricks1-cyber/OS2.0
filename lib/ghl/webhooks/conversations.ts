@@ -7,6 +7,8 @@ import {
   type GhlConversation,
   type GhlMessage,
 } from '../conversations'
+import { getContact } from '../contacts'
+import { upsertGhlContact } from './contacts'
 
 type ConversationRow = Database['public']['Tables']['ghl_conversations']['Insert']
 type MessageRow = Database['public']['Tables']['ghl_messages']['Insert']
@@ -63,10 +65,10 @@ function toIsoTimestamp(v: unknown): string | null {
   return null
 }
 
-export function mapConversationRow(c: GhlConversation): ConversationRow {
+export function mapConversationRow(c: GhlConversation, opts?: { contactExists?: boolean }): ConversationRow {
   return {
     ghl_id: c.id,
-    contact_id: c.contactId ?? null,
+    contact_id: opts?.contactExists === false ? null : c.contactId ?? null,
     last_message_type: normalizeMessageType(c.lastMessageType ?? null),
     last_message_body: c.lastMessageBody ?? null,
     last_message_at: toIsoTimestamp(c.lastMessageDate),
@@ -101,8 +103,31 @@ export function mapMessageRow(m: GhlMessage, opts: { conversationId: string; con
   }
 }
 
+// Returns true if the contact now exists in our mirror (was already there or was just upserted).
+export async function ensureContactMirrored(contactId: string | null | undefined): Promise<boolean> {
+  if (!contactId) return false
+  const { data } = await supabaseAdmin
+    .from('ghl_contacts')
+    .select('ghl_id')
+    .eq('ghl_id', contactId)
+    .maybeSingle()
+  if (data) return true
+  // Try to fetch from GHL and mirror. If the contact is gone or unauthorized, give up.
+  try {
+    const fresh = await getContact(contactId)
+    if (fresh) {
+      await upsertGhlContact(fresh)
+      return true
+    }
+  } catch (err) {
+    console.warn('[ensureContactMirrored] fetch failed', contactId, err)
+  }
+  return false
+}
+
 export async function upsertGhlConversation(c: GhlConversation) {
-  const row = mapConversationRow(c)
+  const contactExists = await ensureContactMirrored(c.contactId)
+  const row = mapConversationRow(c, { contactExists })
   const { error } = await supabaseAdmin
     .from('ghl_conversations')
     .upsert(row, { onConflict: 'ghl_id' })

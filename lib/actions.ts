@@ -1,5 +1,6 @@
 'use server'
 
+import { randomBytes } from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
@@ -11,6 +12,10 @@ import {
   updateActiveSubscriptionPrice,
   sendOneOffInvoice,
 } from '@/lib/stripe/retainer'
+
+function newShareSlug(): string {
+  return randomBytes(9).toString('base64url')
+}
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -369,6 +374,82 @@ export async function sendRetainerOneOffInvoice(
   revalidatePath('/dashboard/crucible-pro')
 
   return { hostedUrl: invoice.hosted_invoice_url ?? null, invoiceId: invoice.id }
+}
+
+export async function enablePublicShare(): Promise<{ slug: string; enabled: true }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('public_share_slug')
+    .eq('id', user.id)
+    .single()
+
+  let slug = existing?.public_share_slug ?? null
+  if (slug) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ public_share_enabled: true, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+    if (error) throw new Error(`Failed to enable share: ${error.message}`)
+  } else {
+    for (let i = 0; i < 3 && !slug; i++) {
+      const candidate = newShareSlug()
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          public_share_slug: candidate,
+          public_share_enabled: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+      if (!error) slug = candidate
+    }
+    if (!slug) throw new Error('Could not generate share slug')
+  }
+
+  revalidatePath('/dashboard/money-model')
+  return { slug, enabled: true }
+}
+
+export async function disablePublicShare(): Promise<{ slug: string | null; enabled: false }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ public_share_enabled: false, updated_at: new Date().toISOString() })
+    .eq('id', user.id)
+    .select('public_share_slug')
+    .single()
+  if (error) throw new Error(`Failed to disable share: ${error.message}`)
+
+  revalidatePath('/dashboard/money-model')
+  return { slug: data?.public_share_slug ?? null, enabled: false }
+}
+
+export async function regeneratePublicShareSlug(): Promise<{ slug: string; enabled: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  for (let i = 0; i < 3; i++) {
+    const candidate = newShareSlug()
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ public_share_slug: candidate, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+      .select('public_share_enabled')
+      .single()
+    if (!error && data) {
+      revalidatePath('/dashboard/money-model')
+      return { slug: candidate, enabled: data.public_share_enabled }
+    }
+  }
+  throw new Error('Could not generate share slug')
 }
 
 export async function revokeCrucibleProAccess(userId: string) {
