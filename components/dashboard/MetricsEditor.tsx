@@ -1,11 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { BusinessMetrics } from '@/types/metrics'
+import type { PrimaryOffer, CROBlocker } from '@/types/intake'
 
 interface MetricsEditorProps {
-  metrics: BusinessMetrics
+  metrics: BusinessMetrics | null
+  triggerLabel?: string
+  triggerClassName?: string
+  defaultOpen?: boolean
+  /** When true, the component renders nothing when closed — relies on external triggers via the `crucible:open-metrics-editor` event. */
+  headless?: boolean
+}
+
+interface OfferRow {
+  name: string
+  price: string
+  price_type: PrimaryOffer['price_type'] | ''
+  description: string
+}
+
+interface BlockerRow {
+  rank: string
+  title: string
+  explanation: string
+  cro_lever: string
 }
 
 interface FormState {
@@ -23,24 +43,53 @@ interface FormState {
   monthly_revenue: string
   monthly_new_customers: string
   close_rate: string
+  offers: OfferRow[]
+  blockers: BlockerRow[]
 }
 
-function toForm(m: BusinessMetrics): FormState {
+const EMPTY_OFFER: OfferRow = { name: '', price: '', price_type: '', description: '' }
+const EMPTY_BLOCKER: BlockerRow = { rank: '', title: '', explanation: '', cro_lever: '' }
+
+function offersFrom(metrics: BusinessMetrics | null): OfferRow[] {
+  const raw = (metrics?.primary_offers ?? null) as PrimaryOffer[] | null
+  if (!raw || raw.length === 0) return []
+  return raw.map((o) => ({
+    name: o.name ?? '',
+    price: o.price != null ? o.price.toString() : '',
+    price_type: o.price_type ?? '',
+    description: o.description ?? '',
+  }))
+}
+
+function blockersFrom(metrics: BusinessMetrics | null): BlockerRow[] {
+  const raw = (metrics?.cro_blockers ?? null) as CROBlocker[] | null
+  if (!raw || raw.length === 0) return []
+  return raw.map((b) => ({
+    rank: b.rank?.toString() ?? '',
+    title: b.title ?? '',
+    explanation: b.explanation ?? '',
+    cro_lever: b.cro_lever ?? '',
+  }))
+}
+
+function toForm(m: BusinessMetrics | null): FormState {
   return {
-    company_name: m.company_name ?? '',
-    website: m.website ?? '',
-    revenue_goal_1yr: m.revenue_goal_1yr?.toString() ?? '',
-    business_type: m.business_type ?? '',
-    industry: m.industry ?? '',
-    cac: m.cac?.toString() ?? '',
-    ltv: m.ltv?.toString() ?? '',
-    gross_profit_per_customer: m.gross_profit_per_customer?.toString() ?? '',
-    gross_profit_first_30_days: m.gross_profit_first_30_days?.toString() ?? '',
-    lifetime_gross_profit_per_customer: m.lifetime_gross_profit_per_customer?.toString() ?? '',
-    cash_collected_first_30_days: m.cash_collected_first_30_days?.toString() ?? '',
-    monthly_revenue: m.monthly_revenue?.toString() ?? '',
-    monthly_new_customers: m.monthly_new_customers?.toString() ?? '',
-    close_rate: m.close_rate != null ? (m.close_rate * 100).toFixed(1) : '',
+    company_name: m?.company_name ?? '',
+    website: m?.website ?? '',
+    revenue_goal_1yr: m?.revenue_goal_1yr?.toString() ?? '',
+    business_type: m?.business_type ?? '',
+    industry: m?.industry ?? '',
+    cac: m?.cac?.toString() ?? '',
+    ltv: m?.ltv?.toString() ?? '',
+    gross_profit_per_customer: m?.gross_profit_per_customer?.toString() ?? '',
+    gross_profit_first_30_days: m?.gross_profit_first_30_days?.toString() ?? '',
+    lifetime_gross_profit_per_customer: m?.lifetime_gross_profit_per_customer?.toString() ?? '',
+    cash_collected_first_30_days: m?.cash_collected_first_30_days?.toString() ?? '',
+    monthly_revenue: m?.monthly_revenue?.toString() ?? '',
+    monthly_new_customers: m?.monthly_new_customers?.toString() ?? '',
+    close_rate: m?.close_rate != null ? (m.close_rate * 100).toFixed(1) : '',
+    offers: offersFrom(m),
+    blockers: blockersFrom(m),
   }
 }
 
@@ -62,24 +111,94 @@ function calcDerived(f: FormState) {
   return { ratio, payback, required }
 }
 
-export function MetricsEditor({ metrics }: MetricsEditorProps) {
+export function MetricsEditor({
+  metrics,
+  triggerLabel = 'Edit Metrics',
+  triggerClassName,
+  defaultOpen = false,
+  headless = true,
+}: MetricsEditorProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultOpen)
   const [form, setForm] = useState<FormState>(() => toForm(metrics))
   const [saving, setSaving] = useState(false)
   const [clearing, setClearing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const derived = calcDerived(form)
+  // Listen for global "open editor" events so empty cards/banners can trigger this.
+  useEffect(() => {
+    function onOpen() {
+      setForm(toForm(metrics))
+      setError(null)
+      setOpen(true)
+    }
+    window.addEventListener('crucible:open-metrics-editor', onOpen)
+    return () => window.removeEventListener('crucible:open-metrics-editor', onOpen)
+  }, [metrics])
 
-  function set(field: keyof FormState, value: string) {
+  const derived = calcDerived(form)
+  const hasRow = metrics !== null
+
+  function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function setOffer(i: number, patch: Partial<OfferRow>) {
+    setForm((prev) => ({
+      ...prev,
+      offers: prev.offers.map((o, idx) => (idx === i ? { ...o, ...patch } : o)),
+    }))
+  }
+
+  function setBlocker(i: number, patch: Partial<BlockerRow>) {
+    setForm((prev) => ({
+      ...prev,
+      blockers: prev.blockers.map((b, idx) => (idx === i ? { ...b, ...patch } : b)),
+    }))
+  }
+
+  function addOffer() {
+    setForm((prev) => ({ ...prev, offers: [...prev.offers, { ...EMPTY_OFFER }] }))
+  }
+
+  function removeOffer(i: number) {
+    setForm((prev) => ({ ...prev, offers: prev.offers.filter((_, idx) => idx !== i) }))
+  }
+
+  function addBlocker() {
+    const nextRank = (form.blockers.length + 1).toString()
+    setForm((prev) => ({
+      ...prev,
+      blockers: [...prev.blockers, { ...EMPTY_BLOCKER, rank: nextRank }],
+    }))
+  }
+
+  function removeBlocker(i: number) {
+    setForm((prev) => ({ ...prev, blockers: prev.blockers.filter((_, idx) => idx !== i) }))
   }
 
   async function handleSave() {
     setSaving(true)
     setError(null)
     try {
+      const cleanedOffers: PrimaryOffer[] = form.offers
+        .filter((o) => o.name.trim().length > 0)
+        .map((o) => ({
+          name: o.name.trim(),
+          price: parseNum(o.price),
+          price_type: o.price_type === '' ? null : o.price_type,
+          description: o.description.trim() || null,
+        }))
+
+      const cleanedBlockers: CROBlocker[] = form.blockers
+        .filter((b) => b.title.trim().length > 0)
+        .map((b, i) => ({
+          rank: parseNum(b.rank) ?? i + 1,
+          title: b.title.trim(),
+          explanation: b.explanation.trim(),
+          cro_lever: b.cro_lever.trim(),
+        }))
+
       const res = await fetch('/api/metrics', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -98,6 +217,8 @@ export function MetricsEditor({ metrics }: MetricsEditorProps) {
           monthly_revenue: parseNum(form.monthly_revenue),
           monthly_new_customers: parseNum(form.monthly_new_customers),
           close_rate: parseNum(form.close_rate) != null ? parseNum(form.close_rate)! / 100 : null,
+          primary_offers: cleanedOffers.length > 0 ? cleanedOffers : null,
+          cro_blockers: cleanedBlockers.length > 0 ? cleanedBlockers : null,
         }),
       })
       if (!res.ok) {
@@ -125,22 +246,32 @@ export function MetricsEditor({ metrics }: MetricsEditorProps) {
   }
 
   if (!open) {
+    if (headless) return null
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-sm text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
+        className={
+          triggerClassName ??
+          'text-sm text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors'
+        }
       >
-        Edit Metrics
+        {triggerLabel}
       </button>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6 w-full">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Edit Metrics</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Changes will invalidate your cached report — a fresh one will be generated on next visit.</p>
+          <h2 className="text-base font-semibold text-gray-900">
+            {hasRow ? 'Edit Metrics' : 'Fill In Your Metrics'}
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {hasRow
+              ? 'Changes will invalidate your cached report — a fresh one will be generated on next visit.'
+              : 'Enter what you know now — you can refine later. Once the core fields are filled you can generate your CRO report.'}
+          </p>
         </div>
         <button
           onClick={() => { setOpen(false); setForm(toForm(metrics)); setError(null) }}
@@ -197,6 +328,121 @@ export function MetricsEditor({ metrics }: MetricsEditorProps) {
         </div>
       </div>
 
+      {/* Primary offers */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Primary Offers</p>
+          <button
+            onClick={addOffer}
+            type="button"
+            className="text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded-md px-2 py-1"
+          >
+            + Add offer
+          </button>
+        </div>
+        {form.offers.length === 0 ? (
+          <p className="text-xs text-gray-400">No offers yet. Add the products or services you sell.</p>
+        ) : (
+          <div className="space-y-3">
+            {form.offers.map((offer, i) => (
+              <div key={i} className="border border-gray-100 rounded-xl p-3 bg-gray-50 space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Field label="Name" value={offer.name} onChange={(v) => setOffer(i, { name: v })} placeholder="e.g. Quarterly Pest Plan" />
+                  <Field label="Price ($)" value={offer.price} onChange={(v) => setOffer(i, { price: v })} type="number" placeholder="0" />
+                  <SelectField
+                    label="Billing"
+                    value={offer.price_type ?? ''}
+                    onChange={(v) => setOffer(i, { price_type: v as OfferRow['price_type'] })}
+                    options={[
+                      { value: '', label: '—' },
+                      { value: 'one_time', label: 'One-time' },
+                      { value: 'monthly', label: 'Monthly' },
+                      { value: 'annual', label: 'Annual' },
+                      { value: 'custom', label: 'Custom' },
+                    ]}
+                  />
+                </div>
+                <Field
+                  label="Description"
+                  value={offer.description}
+                  onChange={(v) => setOffer(i, { description: v })}
+                  placeholder="Optional short description"
+                />
+                <div className="text-right">
+                  <button
+                    onClick={() => removeOffer(i)}
+                    type="button"
+                    className="text-xs text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Growth blockers */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Top Growth Blockers</p>
+          <button
+            onClick={addBlocker}
+            type="button"
+            className="text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded-md px-2 py-1"
+          >
+            + Add blocker
+          </button>
+        </div>
+        {form.blockers.length === 0 ? (
+          <p className="text-xs text-gray-400">No blockers listed. Add the things slowing your growth, ranked by impact.</p>
+        ) : (
+          <div className="space-y-3">
+            {form.blockers.map((blocker, i) => (
+              <div key={i} className="border border-gray-100 rounded-xl p-3 bg-gray-50 space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Field
+                    label="Rank"
+                    value={blocker.rank}
+                    onChange={(v) => setBlocker(i, { rank: v })}
+                    type="number"
+                    placeholder="1"
+                  />
+                  <Field
+                    label="Title"
+                    value={blocker.title}
+                    onChange={(v) => setBlocker(i, { title: v })}
+                    placeholder="e.g. Low close rate on quotes"
+                  />
+                  <Field
+                    label="CRO Lever"
+                    value={blocker.cro_lever}
+                    onChange={(v) => setBlocker(i, { cro_lever: v })}
+                    placeholder="e.g. sales, retention"
+                  />
+                </div>
+                <Field
+                  label="Explanation"
+                  value={blocker.explanation}
+                  onChange={(v) => setBlocker(i, { explanation: v })}
+                  placeholder="Why this blocks growth"
+                />
+                <div className="text-right">
+                  <button
+                    onClick={() => removeBlocker(i)}
+                    type="button"
+                    className="text-xs text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Derived preview */}
       {(derived.ratio || derived.payback || derived.required) && (
         <div className="bg-gray-50 rounded-xl p-4">
@@ -229,13 +475,15 @@ export function MetricsEditor({ metrics }: MetricsEditorProps) {
       )}
 
       <div className="flex items-center justify-between pt-1">
-        <button
-          onClick={handleClear}
-          disabled={clearing}
-          className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-        >
-          {clearing ? 'Clearing…' : 'Clear all metrics'}
-        </button>
+        {hasRow ? (
+          <button
+            onClick={handleClear}
+            disabled={clearing}
+            className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+          >
+            {clearing ? 'Clearing…' : 'Clear all metrics'}
+          </button>
+        ) : <span />}
         <button
           onClick={handleSave}
           disabled={saving}
@@ -271,6 +519,33 @@ function Field({
         placeholder={placeholder}
         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
       />
+    </div>
+  )
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div>
+      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </div>
   )
 }

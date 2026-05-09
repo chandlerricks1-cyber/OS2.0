@@ -27,6 +27,8 @@ export async function PUT(req: NextRequest) {
     monthly_revenue,
     monthly_new_customers,
     close_rate,
+    primary_offers,
+    cro_blockers,
   } = body
 
   // Derive calculated fields
@@ -36,7 +38,8 @@ export async function PUT(req: NextRequest) {
 
   const { error: metricsError } = await supabase
     .from('business_metrics')
-    .update({
+    .upsert({
+      user_id: user.id,
       company_name: company_name || null,
       website: website || null,
       revenue_goal_1yr: revenue_goal_1yr ?? null,
@@ -54,9 +57,10 @@ export async function PUT(req: NextRequest) {
       close_rate: close_rate ?? null,
       cac_payback_months,
       required_30_day_revenue,
+      ...(primary_offers !== undefined ? { primary_offers } : {}),
+      ...(cro_blockers !== undefined ? { cro_blockers } : {}),
       updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', user.id)
+    }, { onConflict: 'user_id' })
 
   if (metricsError) {
     return NextResponse.json({ error: metricsError.message }, { status: 500 })
