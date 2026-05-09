@@ -15,7 +15,7 @@ const rotatingPhrases = [
 ]
 
 const stats = [
-  { value: '~1 week', label: 'Setup time from start to finish' },
+  { value: '3 hours to setup', label: 'Setup time from start to finish' },
   { value: 'Same day', label: 'Check deposits after setup' },
   { value: '$0', label: "Ongoing fees — one-time setup, that's it" },
 ]
@@ -88,7 +88,7 @@ const testimonials = [
 const faqs = [
   {
     q: 'Is this actually legal?',
-    a: 'Yes. Third-party indemnification is a standard banking instrument. The bank executes an agreement with your company that allows them to process multi-party checks on your behalf. Since you hold a valid Assignment of Benefits or Direction to Pay from the homeowner, you have a lawful right to the funds. The indemnification agreement simply releases the bank from liability — the same way the bank protects itself in any commercial deposit scenario. This has been used by contractors for years.',
+    a: 'Yes. The bank executes an agreement with your company that allows them to process multi-party checks on your behalf, specifically without the need for endorsements from parties listed on the check. Since you hold a valid Assignment of Benefits or Direction to Pay from the homeowner, you have a lawful right to the funds. The agreements Crucible will help you implement simply releases the bank from liability — the same way the bank protects itself in any commercial deposit scenario.',
   },
   {
     q: 'What kind of checks can I deposit without endorsement?',
@@ -224,9 +224,9 @@ export default function MortgageHoldsPage() {
           </h1>
 
           <p className="text-lg text-page-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-            Crucible sets up a third-party indemnification arrangement with a banking partner so you can
-            deposit multi-party insurance checks — without chasing mortgage company endorsements, mailing
-            certified letters, or waiting weeks to get paid for work you already completed.
+            Crucible sets up a series of agreements so you can deposit multi-party insurance checks —
+            without chasing mortgage company endorsements, mailing certified letters, or waiting weeks
+            to get paid for work you already completed.
           </p>
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
