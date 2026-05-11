@@ -3,7 +3,24 @@
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
 import { Logo } from '@/components/shared/Logo'
-import { Star, Plus, Minus, ChevronRight, X } from 'lucide-react'
+import {
+  Star,
+  Plus,
+  Minus,
+  ChevronRight,
+  X,
+  Home,
+  FileCheck,
+  FileText,
+  Mail,
+  Landmark,
+  ClipboardList,
+  Clock,
+  Banknote,
+  Smartphone,
+  CheckCircle2,
+  Zap,
+} from 'lucide-react'
 
 const BOOKING_IFRAME_SRC = 'https://start.cruciblecoaching.org/widget/booking/n6ep2x22ahM8EnsfIsKk'
 const BOOKING_IFRAME_ID = 'n6ep2x22ahM8EnsfIsKk_1778162284873'
@@ -39,6 +56,26 @@ const steps = [
     description:
       'Once approved, you have a third-party indemnification agreement in place for the life of your business. No more mortgage holds. No more certified mail. No more waiting. Just deposit and move on.',
   },
+]
+
+const oldWaySteps = [
+  { Icon: Home, label: 'Land insurance restoration job' },
+  { Icon: FileCheck, label: 'Get claim approved' },
+  { Icon: FileText, label: 'Insurance sends check', sub: 'Homeowner + mortgage company listed' },
+  { Icon: Mail, label: 'Mail check via certified mail', sub: 'Days after picking it up' },
+  { Icon: Landmark, label: 'Mortgage co. holds your funds', sub: 'Until full job is completed' },
+  { Icon: ClipboardList, label: 'Send 2x the reports', sub: 'Progress + completion to insurance AND mortgage' },
+  { Icon: Clock, label: 'Mortgage releases funds', sub: '3–5 weeks after landing the job' },
+  { Icon: Banknote, label: 'You finally get paid', sub: '5–6 weeks on average' },
+]
+
+const newWaySteps = [
+  { Icon: Home, label: 'Land insurance restoration job' },
+  { Icon: FileCheck, label: 'Get claim approved' },
+  { Icon: FileText, label: 'Pick up check from homeowner', sub: 'Homeowner + mortgage company listed' },
+  { Icon: Smartphone, label: 'Remote deposit into your TPI account', sub: 'Same day — no endorsements needed' },
+  { Icon: Banknote, label: 'Funds available within 24 hours' },
+  { Icon: CheckCircle2, label: 'Done.' },
 ]
 
 const features = [
@@ -96,7 +133,7 @@ const faqs = [
   },
   {
     q: 'How long does the setup take?',
-    a: "About one week from the time you provide all required documentation to our banking partner. We'll tell you exactly what's needed upfront so there's no guesswork or delays on your end.",
+    a: "About 5-7 days from the time you provide all required documentation to our banking partner. We'll tell you exactly what's needed upfront so there's no guesswork or delays on your end.",
   },
   {
     q: 'What does it cost?',
@@ -296,6 +333,96 @@ export default function MortgageHoldsPage() {
                 <p className="text-page-muted text-base leading-relaxed">{item.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Old Way vs New Way ───────────────────────── */}
+      <section className="bg-white py-20 md:py-24 px-6 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 scroll-reveal">
+            <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 max-w-3xl mx-auto leading-tight">
+              Mortgage holds are costing you weeks of cash flow.
+            </h2>
+            <p className="text-lg text-page-muted max-w-xl mx-auto">
+              The old way vs. the way Crucible sets you up to get paid.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+
+            {/* Old Way */}
+            <div className="scroll-reveal bg-red-50/40 rounded-[25px] p-7 sm:p-8 border border-red-100">
+              <div className="flex items-center gap-3 pb-4 mb-6 border-b border-red-200/70">
+                <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center">
+                  <X className="w-5 h-5 text-[#E24B4A]" strokeWidth={3} />
+                </div>
+                <h3 className="text-xl font-bold text-[#E24B4A]">The old way</h3>
+              </div>
+
+              <div className="relative">
+                {oldWaySteps.map(({ Icon, label, sub }, i) => (
+                  <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
+                    {i < oldWaySteps.length - 1 && (
+                      <span className="absolute left-[19px] top-10 bottom-0 w-px bg-red-200" />
+                    )}
+                    <div className="relative z-10 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-[#E24B4A]" />
+                    </div>
+                    <div className="pt-1.5">
+                      <div className="font-semibold text-page-dark text-[15px] leading-snug">
+                        {label}
+                      </div>
+                      {sub && (
+                        <div className="text-sm text-page-muted mt-1 leading-snug">{sub}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center gap-3 bg-red-100/70 text-[#E24B4A] rounded-2xl px-5 py-4">
+                <Clock className="w-5 h-5 flex-shrink-0" />
+                <span className="font-bold text-[15px]">5–6 weeks to get your money</span>
+              </div>
+            </div>
+
+            {/* New Way */}
+            <div className="scroll-reveal bg-emerald-50/40 rounded-[25px] p-7 sm:p-8 border border-emerald-100" style={{ transitionDelay: '100ms' }}>
+              <div className="flex items-center gap-3 pb-4 mb-6 border-b border-emerald-200/70">
+                <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-[#1D9E75]" strokeWidth={2.5} />
+                </div>
+                <h3 className="text-xl font-bold text-[#1D9E75]">The new way</h3>
+              </div>
+
+              <div className="relative">
+                {newWaySteps.map(({ Icon, label, sub }, i) => (
+                  <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
+                    {i < newWaySteps.length - 1 && (
+                      <span className="absolute left-[19px] top-10 bottom-0 w-px bg-emerald-200" />
+                    )}
+                    <div className="relative z-10 w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-[#1D9E75]" />
+                    </div>
+                    <div className="pt-1.5">
+                      <div className="font-semibold text-page-dark text-[15px] leading-snug">
+                        {label}
+                      </div>
+                      {sub && (
+                        <div className="text-sm text-page-muted mt-1 leading-snug">{sub}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center gap-3 bg-emerald-100/70 text-[#1D9E75] rounded-2xl px-5 py-4">
+                <Zap className="w-5 h-5 flex-shrink-0" />
+                <span className="font-bold text-[15px]">Same-day deposit, every time</span>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
