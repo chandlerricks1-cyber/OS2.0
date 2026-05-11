@@ -150,7 +150,7 @@ const testimonials = [
     company: 'Bloque Restoration',
     location: 'Arizona',
     website: 'bloquerestoration.com',
-    logo: 'https://graph.facebook.com/bloquerestoration/picture?type=large',
+    logo: 'https://scontent-phx1-1.xx.fbcdn.net/v/t39.30808-6/347113853_935311514186767_5268402295561460705_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=EpuGfXsTkxcQ7kNvwG-9bEY&_nc_oc=AdpSHFSueYnj2NGhZzdHVPoT-lscM-bpj-xfsrXSWfLgOpRD16CBFr6LT8HfYTqE0zytU0UUFw5IHLTM_YlfUjvr&_nc_zt=23&_nc_ht=scontent-phx1-1.xx&_nc_gid=4LzPdyt6wr0Q1ho8_bfEgg&_nc_ss=7b2a8&oh=00_Af5LeoMkqvJb18pIIVYxE1BMOkEm3vs48uW1Tx3a_35PfQ&oe=6A0726D8',
     logoBg: 'bg-white',
     revenue: '$4M',
     years: '1.1 yrs',
