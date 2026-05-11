@@ -150,7 +150,7 @@ const testimonials = [
     company: 'Bloque Restoration',
     location: 'Arizona',
     website: 'bloquerestoration.com',
-    logo: 'https://www.bloquerestoration.com/apple-touch-icon.png',
+    logo: 'https://graph.facebook.com/bloquerestoration/picture?type=large',
     logoBg: 'bg-white',
     revenue: '$4M',
     years: '1.1 yrs',
