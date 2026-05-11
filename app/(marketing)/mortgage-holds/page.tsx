@@ -334,7 +334,7 @@ export default function MortgageHoldsPage() {
             <div className="relative aspect-video rounded-3xl overflow-hidden shadow-elevated border border-gray-200 bg-page-dark">
               <iframe
                 ref={videoRef}
-                src="https://www.youtube.com/embed/Jxt9MHU4jy0?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&controls=1&enablejsapi=1"
+                src="https://www.youtube.com/embed/Jxt9MHU4jy0?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&controls=1&enablejsapi=1&cc_load_policy=1&cc_lang_pref=en"
                 title="Crucible TPI Walkthrough"
                 className="absolute inset-0 w-full h-full"
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
