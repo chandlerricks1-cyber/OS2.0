@@ -121,22 +121,56 @@ const features = [
 
 const testimonials = [
   {
+    company: 'Ikon Roofing',
+    location: 'Utah',
+    website: 'ikonroof.com',
+    logo: 'https://images.squarespace-cdn.com/content/v1/646d2fbe9c001915b1f0c660/c204fd8b-9295-48fb-a27c-5b8486f066cd/ikon_logo_white_text.png?format=300w',
+    logoBg: 'bg-page-dark',
+    revenue: '$17M',
+    years: '2.2 yrs',
     quote:
-      "We had $180K sitting in mortgage holds at one point. Now every check gets deposited the day we get it. I wish I'd known about this three years ago.",
-    name: 'Mike R.',
-    title: 'Roofing Company Owner',
+      "We've processed $17M through this in just over two years. Before TPI we had six figures sitting in mortgage holds at any given time — now every check we touch hits the account same-day. Total game changer for cash flow.",
+    name: 'Conner',
+    title: 'Owner, Ikon Roofing',
   },
   {
+    company: 'FBC Roofing',
+    location: 'Utah',
+    website: 'fbcroofing.com',
+    logo: 'https://static.wixstatic.com/media/e61cf0_7b8f5da8e12648688d7ed45de8c53cbe~mv2.png/v1/fill/w_180,h_180,lg_1,usm_0.66_1.00_0.01/e61cf0_7b8f5da8e12648688d7ed45de8c53cbe~mv2.png',
+    logoBg: 'bg-white',
+    revenue: '$34M',
+    years: '4.5 yrs',
     quote:
-      "The setup took about a week and I haven't thought about mortgage holds since. That alone is worth 10x what I paid.",
-    name: 'Derek S.',
-    title: 'Restoration Contractor',
+      "$34M and four and a half years in — we haven't waited on a single mortgage company endorsement since the day we got set up. The system paid for itself in the first week and I can't imagine running the business without it now.",
+    name: 'Adam',
+    title: 'Owner, FBC Roofing',
   },
   {
+    company: 'Bloque Restoration',
+    location: 'Arizona',
+    website: 'bloquerestoration.com',
+    logo: 'https://www.bloquerestoration.com/apple-touch-icon.png',
+    logoBg: 'bg-white',
+    revenue: '$4M',
+    years: '1.1 yrs',
     quote:
-      "I used to have a full-time person chasing mortgage companies for endorsements. Now that role doesn't exist. The savings are insane.",
-    name: 'Jessica T.',
-    title: 'Roofing & Restoration CEO',
+      "In our first year we pushed $4M through with zero mortgage holds. I wish I'd had this from day one — it would've saved us months of cash flow we didn't have to spare as a newer shop trying to scale.",
+    name: 'Payson',
+    title: 'Owner, Bloque Restoration',
+  },
+  {
+    company: 'Advosy Construction',
+    location: 'Arizona',
+    website: 'advosy.com',
+    logo: 'https://www.advosy.com/apple-touch-icon.png',
+    logoBg: 'bg-white',
+    revenue: '$7M',
+    years: '1.5 yrs',
+    quote:
+      "$7M cashed without my team chasing a single mortgage company endorsement. We freed up an entire admin role that used to exist just to manage that paperwork. The math is absurd — I'd pay 10x for this.",
+    name: 'Brett',
+    title: 'Owner, Advosy Construction',
   },
 ]
 
@@ -591,32 +625,87 @@ export default function MortgageHoldsPage() {
       {/* ── Social Proof ─────────────────────────────── */}
       <section className="bg-white py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black text-page-dark text-center mb-16 tracking-tight scroll-reveal">
-            Trusted by contractors who got tired<br className="hidden sm:block" /> of waiting to get paid
-          </h2>
+          <div className="text-center mb-16 scroll-reveal">
+            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-xs font-semibold px-4 py-2 rounded-full mb-5 tracking-wide uppercase">
+              <BadgeCheck className="w-3.5 h-3.5" />
+              $62M+ processed through TPI
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 leading-tight">
+              Trusted by contractors who got tired<br className="hidden sm:block" /> of waiting to get paid
+            </h2>
+            <p className="text-lg text-page-muted max-w-xl mx-auto">
+              Real companies. Real revenue cashed without a single mortgage hold.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
             {testimonials.map((t, i) => (
               <div
-                key={t.name}
-                className="scroll-reveal bg-white rounded-[25px] p-8 shadow-card-soft border border-gray-100"
+                key={t.company}
+                className="scroll-reveal bg-white rounded-[25px] p-7 sm:p-8 shadow-card-soft border border-gray-100 hover:shadow-elevated transition-shadow duration-300 flex flex-col"
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
-                <div className="flex gap-1 mb-5">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-5 h-5 text-brand-gradient-end fill-brand-gradient-end" />
-                  ))}
+                {/* Header — logo + company */}
+                <div className="flex items-start gap-4 mb-5">
+                  <div className={`w-14 h-14 rounded-2xl ${t.logoBg} border border-gray-200 shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={t.logo}
+                      alt={`${t.company} logo`}
+                      className="w-full h-full object-contain p-1.5"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-lg font-black text-page-dark truncate">{t.company}</h3>
+                      <BadgeCheck className="w-5 h-5 text-brand-gradient-end fill-brand-gradient-end/10 flex-shrink-0" aria-label="Verified" />
+                    </div>
+                    <div className="text-sm text-page-muted truncate">{t.location} · {t.website}</div>
+                  </div>
                 </div>
-                <p className="text-page-dark text-base leading-relaxed mb-6 italic">
+
+                {/* Stars + verified label */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-4 h-4 text-brand-gradient-end fill-brand-gradient-end" />
+                    ))}
+                  </div>
+                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/70">
+                    Verified TPI Customer
+                  </span>
+                </div>
+
+                {/* Quote */}
+                <p className="text-page-dark text-[15px] leading-relaxed mb-6 flex-1">
                   &ldquo;{t.quote}&rdquo;
                 </p>
+
+                {/* Stat tiles */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="bg-gradient-to-br from-brand-gradient-start/5 to-brand-gradient-end/10 border border-brand-gradient-end/15 rounded-2xl px-4 py-3">
+                    <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end leading-none">
+                      {t.revenue}
+                    </div>
+                    <div className="text-xs text-page-muted mt-1.5 font-medium">cashed through TPI</div>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
+                    <div className="text-2xl font-black text-page-dark leading-none">
+                      {t.years}
+                    </div>
+                    <div className="text-xs text-page-muted mt-1.5 font-medium">using the system</div>
+                  </div>
+                </div>
+
+                {/* Owner footer */}
                 <div className="border-t border-gray-100 pt-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                     {t.name.charAt(0)}
                   </div>
-                  <div>
-                    <div className="font-semibold text-page-dark text-sm">{t.name}</div>
-                    <div className="text-page-muted text-xs">{t.title}</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-page-dark text-sm">{t.name}</div>
+                    <div className="text-page-muted text-xs truncate">{t.title}</div>
                   </div>
                 </div>
               </div>
