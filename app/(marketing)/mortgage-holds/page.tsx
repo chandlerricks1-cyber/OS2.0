@@ -20,6 +20,13 @@ import {
   Smartphone,
   CheckCircle2,
   Zap,
+  UserPlus,
+  PhoneCall,
+  ScrollText,
+  Send,
+  ScanLine,
+  BadgeCheck,
+  Sparkles,
 } from 'lucide-react'
 
 const BOOKING_IFRAME_SRC = 'https://start.cruciblecoaching.org/widget/booking/n6ep2x22ahM8EnsfIsKk'
@@ -76,6 +83,17 @@ const newWaySteps = [
   { Icon: Smartphone, label: 'Remote deposit into your TPI account', sub: 'Same day — no endorsements needed' },
   { Icon: Banknote, label: 'Funds available within 24 hours' },
   { Icon: CheckCircle2, label: 'Done.' },
+]
+
+const timelineSteps = [
+  { Icon: UserPlus, label: 'Sign up for the Crucible TPI process' },
+  { Icon: PhoneCall, label: '15-min onboarding call', sub: 'Prep your documentation' },
+  { Icon: Landmark, label: 'Set up account with verified banking partner' },
+  { Icon: ScrollText, label: 'Review & improve your existing agreements' },
+  { Icon: Send, label: 'Submit documents for TPI application' },
+  { Icon: ScanLine, label: 'Set up your remote deposit machine' },
+  { Icon: BadgeCheck, label: 'Get approved for the TPI process' },
+  { Icon: Sparkles, label: 'Cash your checks instantly.', sub: 'Forever.' },
 ]
 
 const features = [
@@ -338,7 +356,7 @@ export default function MortgageHoldsPage() {
       </section>
 
       {/* ── Old Way vs New Way ───────────────────────── */}
-      <section className="bg-white py-20 md:py-24 px-6 border-t border-gray-100">
+      <section className="bg-gray-50 py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14 scroll-reveal">
             <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 max-w-3xl mx-auto leading-tight">
@@ -423,6 +441,122 @@ export default function MortgageHoldsPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8-Step Timeline ──────────────────────────── */}
+      <section className="bg-white py-20 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 scroll-reveal">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-gradient-start/10 to-brand-gradient-end/10 border border-brand-gradient-end/20 text-brand-gradient-end text-xs font-semibold px-4 py-2 rounded-full mb-5 tracking-wide uppercase">
+              <span className="w-1.5 h-1.5 bg-brand-gradient-end rounded-full" />
+              The full process
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 max-w-3xl mx-auto leading-tight">
+              From sign-up to same-day deposits in 8 steps.
+            </h2>
+            <p className="text-lg text-page-muted max-w-xl mx-auto">
+              Exactly what happens from the moment you book your call to the day you cash your first check.
+            </p>
+          </div>
+
+          {/* Desktop / tablet: horizontal timeline */}
+          <div className="hidden md:block scroll-reveal">
+            <div className="relative">
+              {/* connecting rail */}
+              <div className="absolute top-7 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-gradient-start/30 via-brand-gradient-end/40 to-brand-gradient-end/80" />
+
+              <div className="grid grid-cols-8 gap-2 lg:gap-3 relative">
+                {timelineSteps.map(({ Icon, label, sub }, i) => {
+                  const isLast = i === timelineSteps.length - 1
+                  return (
+                    <div key={i} className="flex flex-col items-center text-center">
+                      <div className="relative mb-4">
+                        <div
+                          className={`w-14 h-14 rounded-full flex items-center justify-center shadow-card-soft border-2 ${
+                            isLast
+                              ? 'bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end border-white text-white'
+                              : 'bg-white border-brand-gradient-end/30 text-brand-gradient-end'
+                          }`}
+                        >
+                          <Icon className="w-6 h-6" strokeWidth={2.25} />
+                        </div>
+                        <div
+                          className={`absolute -top-1 -right-1 w-6 h-6 rounded-full text-[11px] font-black flex items-center justify-center shadow-sm ${
+                            isLast
+                              ? 'bg-page-dark text-white'
+                              : 'bg-page-dark text-white'
+                          }`}
+                        >
+                          {i + 1}
+                        </div>
+                      </div>
+                      <div className="px-1">
+                        <div className="text-[13px] lg:text-sm font-bold text-page-dark leading-snug">
+                          {label}
+                        </div>
+                        {sub && (
+                          <div className={`text-xs mt-1 leading-snug ${isLast ? 'text-brand-gradient-end font-semibold' : 'text-page-muted'}`}>
+                            {sub}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile: vertical timeline */}
+          <div className="md:hidden scroll-reveal bg-white rounded-[25px] p-7 shadow-card-soft border border-gray-100">
+            <div className="relative">
+              {timelineSteps.map(({ Icon, label, sub }, i) => {
+                const isLast = i === timelineSteps.length - 1
+                return (
+                  <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
+                    {i < timelineSteps.length - 1 && (
+                      <span className="absolute left-[23px] top-12 bottom-0 w-px bg-brand-gradient-end/30" />
+                    )}
+                    <div className="relative flex-shrink-0">
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${
+                          isLast
+                            ? 'bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end border-white text-white shadow-card-soft'
+                            : 'bg-white border-brand-gradient-end/30 text-brand-gradient-end'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" strokeWidth={2.25} />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-page-dark text-white text-[10px] font-black flex items-center justify-center">
+                        {i + 1}
+                      </div>
+                    </div>
+                    <div className="pt-2">
+                      <div className="text-[15px] font-bold text-page-dark leading-snug">
+                        {label}
+                      </div>
+                      {sub && (
+                        <div className={`text-sm mt-1 leading-snug ${isLast ? 'text-brand-gradient-end font-semibold' : 'text-page-muted'}`}>
+                          {sub}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="mt-12 text-center scroll-reveal">
+            <button
+              type="button"
+              onClick={() => setBookingOpen(true)}
+              className="btn-gradient px-10 py-4 text-base"
+            >
+              Start at Step 1 — Book Your Call
+            </button>
           </div>
         </div>
       </section>
