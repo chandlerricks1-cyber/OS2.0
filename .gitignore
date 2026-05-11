@@ -33,3 +33,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local video assets (we use YouTube embeds for VSLs)
+/public/videos/*.mp4
+/public/videos/*.mov
+/public/videos/*.webm

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { Logo } from '@/components/shared/Logo'
 import {
@@ -27,6 +27,7 @@ import {
   ScanLine,
   BadgeCheck,
   Sparkles,
+  Volume2,
 } from 'lucide-react'
 
 const BOOKING_IFRAME_SRC = 'https://start.cruciblecoaching.org/widget/booking/n6ep2x22ahM8EnsfIsKk'
@@ -213,6 +214,20 @@ export default function MortgageHoldsPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [phraseIdx, setPhraseIdx] = useState(0)
   const [bookingOpen, setBookingOpen] = useState(false)
+  const [vslUnmuted, setVslUnmuted] = useState(false)
+  const videoRef = useRef<HTMLIFrameElement>(null)
+
+  const unmuteVideo = () => {
+    setVslUnmuted(true)
+    videoRef.current?.contentWindow?.postMessage(
+      '{"event":"command","func":"unMute","args":""}',
+      '*'
+    )
+    videoRef.current?.contentWindow?.postMessage(
+      '{"event":"command","func":"playVideo","args":""}',
+      '*'
+    )
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -317,6 +332,36 @@ export default function MortgageHoldsPage() {
             without chasing mortgage company endorsements, mailing certified letters, or waiting weeks
             to get paid for work you already completed.
           </p>
+
+          <div className="max-w-3xl mx-auto mb-10 scroll-reveal">
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-elevated border border-gray-200 bg-page-dark">
+              <iframe
+                ref={videoRef}
+                src="https://www.youtube.com/embed/Jxt9MHU4jy0?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&controls=1&enablejsapi=1"
+                title="Crucible TPI Walkthrough"
+                className="absolute inset-0 w-full h-full"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+
+              {!vslUnmuted && (
+                <button
+                  type="button"
+                  onClick={unmuteVideo}
+                  aria-label="Tap to unmute video"
+                  className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-black/15 to-transparent group transition-all"
+                >
+                  <div className="bg-white/95 backdrop-blur-md rounded-full px-7 py-4 shadow-elevated flex items-center gap-3 group-hover:scale-105 transition-transform">
+                    <Volume2 className="w-6 h-6 text-page-dark" />
+                    <span className="text-page-dark font-bold text-base">Tap for sound</span>
+                  </div>
+                  <div className="absolute bottom-4 right-4 text-white/90 text-[11px] font-medium bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                    Muted · click to unmute
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
