@@ -219,14 +219,11 @@ export default function MortgageHoldsPage() {
 
   const unmuteVideo = () => {
     setVslUnmuted(true)
-    videoRef.current?.contentWindow?.postMessage(
-      '{"event":"command","func":"unMute","args":""}',
-      '*'
-    )
-    videoRef.current?.contentWindow?.postMessage(
-      '{"event":"command","func":"playVideo","args":""}',
-      '*'
-    )
+    const win = videoRef.current?.contentWindow
+    if (!win) return
+    win.postMessage('{"event":"command","func":"seekTo","args":[0, true]}', '*')
+    win.postMessage('{"event":"command","func":"unMute","args":""}', '*')
+    win.postMessage('{"event":"command","func":"playVideo","args":""}', '*')
   }
 
   useEffect(() => {
