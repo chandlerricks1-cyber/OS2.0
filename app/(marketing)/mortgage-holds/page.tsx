@@ -263,6 +263,97 @@ export default function MortgageHoldsPage() {
     return () => observer.disconnect()
   }, [])
 
+  const testimonialsContent = (
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-16 scroll-reveal">
+        <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-xs font-semibold px-4 py-2 rounded-full mb-5 tracking-wide uppercase">
+          <BadgeCheck className="w-3.5 h-3.5" />
+          $62M+ processed through TPI
+        </div>
+        <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 leading-tight">
+          Trusted by contractors who got tired<br className="hidden sm:block" /> of waiting to get paid
+        </h2>
+        <p className="text-lg text-page-muted max-w-xl mx-auto">
+          Real companies. Real revenue cashed without a single mortgage hold.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        {testimonials.map((t, i) => (
+          <div
+            key={t.company}
+            className="scroll-reveal bg-white rounded-[25px] p-7 sm:p-8 shadow-card-soft border border-gray-100 hover:shadow-elevated transition-shadow duration-300 flex flex-col"
+            style={{ transitionDelay: `${i * 100}ms` }}
+          >
+            {/* Header — logo + company */}
+            <div className="flex items-start gap-4 mb-5">
+              <div className={`w-14 h-14 rounded-2xl ${t.logoBg} border border-gray-200 shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={t.logo}
+                  alt={`${t.company} logo`}
+                  className="w-full h-full object-contain p-1.5"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-lg font-black text-page-dark truncate">{t.company}</h3>
+                  <BadgeCheck className="w-5 h-5 text-brand-gradient-end fill-brand-gradient-end/10 flex-shrink-0" aria-label="Verified" />
+                </div>
+                <div className="text-sm text-page-muted truncate">{t.location} · {t.website}</div>
+              </div>
+            </div>
+
+            {/* Stars + verified label */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, j) => (
+                  <Star key={j} className="w-4 h-4 text-brand-gradient-end fill-brand-gradient-end" />
+                ))}
+              </div>
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/70">
+                Verified TPI Customer
+              </span>
+            </div>
+
+            {/* Quote */}
+            <p className="text-page-dark text-[15px] leading-relaxed mb-6 flex-1">
+              &ldquo;{t.quote}&rdquo;
+            </p>
+
+            {/* Stat tiles */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="bg-gradient-to-br from-brand-gradient-start/5 to-brand-gradient-end/10 border border-brand-gradient-end/15 rounded-2xl px-4 py-3">
+                <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end leading-none">
+                  {t.revenue}
+                </div>
+                <div className="text-xs text-page-muted mt-1.5 font-medium">cashed through TPI</div>
+              </div>
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
+                <div className="text-2xl font-black text-page-dark leading-none">
+                  {t.years}
+                </div>
+                <div className="text-xs text-page-muted mt-1.5 font-medium">using the system</div>
+              </div>
+            </div>
+
+            {/* Owner footer */}
+            <div className="border-t border-gray-100 pt-5 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {t.name.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold text-page-dark text-sm">{t.name}</div>
+                <div className="text-page-muted text-xs truncate">{t.title}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -376,7 +467,7 @@ export default function MortgageHoldsPage() {
             </a>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-10 hidden sm:block">
             <span className="inline-block text-xs text-page-muted bg-gray-50 border border-gray-100 px-4 py-2 rounded-full">
               See how contractors are eliminating mortgage holds in under 2 minutes
             </span>
@@ -401,8 +492,8 @@ export default function MortgageHoldsPage() {
         </div>
       </section>
 
-      {/* ── How It Works ─────────────────────────────── */}
-      <section id="how-it-works" className="bg-white py-20 md:py-24 px-6">
+      {/* ── How It Works (desktop/tablet only) ──────── */}
+      <section id="how-it-works" className="hidden md:block bg-white py-20 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 scroll-reveal">
             <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4">
@@ -429,6 +520,11 @@ export default function MortgageHoldsPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── Testimonials (mobile only — sits where How It Works does on desktop) ── */}
+      <section className="md:hidden bg-white py-16 px-6">
+        {testimonialsContent}
       </section>
 
       {/* ── Old Way vs New Way ───────────────────────── */}
@@ -665,95 +761,9 @@ export default function MortgageHoldsPage() {
       </section>
 
       {/* ── Social Proof ─────────────────────────────── */}
-      <section className="bg-white py-20 md:py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 scroll-reveal">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200/70 text-emerald-700 text-xs font-semibold px-4 py-2 rounded-full mb-5 tracking-wide uppercase">
-              <BadgeCheck className="w-3.5 h-3.5" />
-              $62M+ processed through TPI
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4 leading-tight">
-              Trusted by contractors who got tired<br className="hidden sm:block" /> of waiting to get paid
-            </h2>
-            <p className="text-lg text-page-muted max-w-xl mx-auto">
-              Real companies. Real revenue cashed without a single mortgage hold.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.company}
-                className="scroll-reveal bg-white rounded-[25px] p-7 sm:p-8 shadow-card-soft border border-gray-100 hover:shadow-elevated transition-shadow duration-300 flex flex-col"
-                style={{ transitionDelay: `${i * 100}ms` }}
-              >
-                {/* Header — logo + company */}
-                <div className="flex items-start gap-4 mb-5">
-                  <div className={`w-14 h-14 rounded-2xl ${t.logoBg} border border-gray-200 shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={t.logo}
-                      alt={`${t.company} logo`}
-                      className="w-full h-full object-contain p-1.5"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-lg font-black text-page-dark truncate">{t.company}</h3>
-                      <BadgeCheck className="w-5 h-5 text-brand-gradient-end fill-brand-gradient-end/10 flex-shrink-0" aria-label="Verified" />
-                    </div>
-                    <div className="text-sm text-page-muted truncate">{t.location} · {t.website}</div>
-                  </div>
-                </div>
-
-                {/* Stars + verified label */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-4 h-4 text-brand-gradient-end fill-brand-gradient-end" />
-                    ))}
-                  </div>
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/70">
-                    Verified TPI Customer
-                  </span>
-                </div>
-
-                {/* Quote */}
-                <p className="text-page-dark text-[15px] leading-relaxed mb-6 flex-1">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-
-                {/* Stat tiles */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="bg-gradient-to-br from-brand-gradient-start/5 to-brand-gradient-end/10 border border-brand-gradient-end/15 rounded-2xl px-4 py-3">
-                    <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end leading-none">
-                      {t.revenue}
-                    </div>
-                    <div className="text-xs text-page-muted mt-1.5 font-medium">cashed through TPI</div>
-                  </div>
-                  <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
-                    <div className="text-2xl font-black text-page-dark leading-none">
-                      {t.years}
-                    </div>
-                    <div className="text-xs text-page-muted mt-1.5 font-medium">using the system</div>
-                  </div>
-                </div>
-
-                {/* Owner footer */}
-                <div className="border-t border-gray-100 pt-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-bold text-page-dark text-sm">{t.name}</div>
-                    <div className="text-page-muted text-xs truncate">{t.title}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* ── Testimonials (desktop/tablet only — mobile copy lives near hero) ── */}
+      <section className="hidden md:block bg-white py-20 md:py-24 px-6">
+        {testimonialsContent}
       </section>
 
       {/* ── FAQ ──────────────────────────────────────── */}
@@ -850,7 +860,7 @@ export default function MortgageHoldsPage() {
       {/* ── Booking Modal ────────────────────────────── */}
       {bookingOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center px-3 py-6 sm:px-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center px-0 py-0 sm:px-6 sm:py-6"
           role="dialog"
           aria-modal="true"
           aria-label="Book a call with Crucible"
@@ -859,22 +869,27 @@ export default function MortgageHoldsPage() {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setBookingOpen(false)}
           />
-          <div className="relative w-full max-w-3xl h-[90vh] bg-white rounded-[20px] shadow-elevated overflow-hidden flex flex-col">
+          <div className="relative w-full max-w-3xl h-[100dvh] sm:h-[90vh] bg-white rounded-none sm:rounded-[20px] shadow-elevated overflow-hidden flex flex-col">
             <button
               type="button"
               onClick={() => setBookingOpen(false)}
-              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-card-soft flex items-center justify-center text-page-dark transition-colors"
+              className="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/95 hover:bg-white shadow-card-soft flex items-center justify-center text-page-dark transition-colors"
               aria-label="Close booking"
             >
               <X className="w-5 h-5" />
             </button>
-            <iframe
-              src={BOOKING_IFRAME_SRC}
-              id={BOOKING_IFRAME_ID}
-              title="Book a call with Crucible"
-              className="w-full h-full border-0"
-              scrolling="no"
-            />
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <iframe
+                src={BOOKING_IFRAME_SRC}
+                id={BOOKING_IFRAME_ID}
+                title="Book a call with Crucible"
+                className="w-full border-0 block"
+                style={{ minHeight: '720px', height: '100%' }}
+              />
+            </div>
           </div>
         </div>
       )}
