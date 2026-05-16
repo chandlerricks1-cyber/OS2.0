@@ -1,6 +1,7 @@
 import type Stripe from 'stripe'
 import { stripe } from './client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { sendCapiEvent, isCapiConfigured } from '@/lib/facebook/capi'
 
 type InvoiceUpsert = {
   user_id: string
@@ -138,6 +139,29 @@ export async function handleStripeWebhook(body: string, signature: string) {
         plan_type: planType,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
+
+      if (isCapiConfigured() && session.amount_total) {
+        const [firstName, ...lastParts] = (session.customer_details?.name ?? '').split(' ')
+        await sendCapiEvent({
+          eventName: isSubscription ? 'Subscribe' : 'Purchase',
+          eventId: `stripe-${session.id}`,
+          eventSourceUrl: session.success_url ?? undefined,
+          actionSource: 'website',
+          userData: {
+            email: session.customer_details?.email ?? undefined,
+            phone: session.customer_details?.phone ?? undefined,
+            firstName: firstName || undefined,
+            lastName: lastParts.join(' ') || undefined,
+            externalId: userId,
+          },
+          customData: {
+            value: session.amount_total / 100,
+            currency: session.currency?.toUpperCase() ?? 'USD',
+            content_name: session.metadata?.product_name ?? 'Stripe Checkout',
+            stripe_price_id: session.metadata?.price_id ?? undefined,
+          },
+        }).catch((err) => console.error('[stripe webhook] CAPI Purchase failed', err))
+      }
       break
     }
 

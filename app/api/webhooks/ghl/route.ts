@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { verifyGhlSignature } from '@/lib/ghl/webhook-verify'
 import { handleContactWebhook } from '@/lib/ghl/webhooks/contacts'
 import { handleConversationWebhook } from '@/lib/ghl/webhooks/conversations'
+import { handleAppointmentWebhook } from '@/lib/ghl/webhooks/appointments'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -117,7 +118,11 @@ async function routeEvent(eventType: string, payload: WebhookPayload) {
     await handleConversationWebhook(eventType, payload as never)
     return
   }
-  // Calendar/Opportunity handlers ship in later phases.
+  if (eventType.startsWith('Appointment')) {
+    await handleAppointmentWebhook(eventType, payload as never)
+    return
+  }
+  // Opportunity handlers ship in later phases.
   // For now, log + ack so we don't lose the event.
   console.log('[ghl webhook] queued (no handler yet):', eventType, payload.id)
 }

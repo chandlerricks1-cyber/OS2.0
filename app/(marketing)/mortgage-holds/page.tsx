@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { Logo } from '@/components/shared/Logo'
+import { fbTrack } from '@/lib/facebook/client'
 import {
   Star,
   Plus,
@@ -226,6 +227,11 @@ export default function MortgageHoldsPage() {
     win.postMessage('{"event":"command","func":"playVideo","args":""}', '*')
   }
 
+  const openBooking = useCallback(() => {
+    setBookingOpen(true)
+    fbTrack('Lead', { content_name: 'Mortgage Holds Booking', content_category: 'mortgage-holds' })
+  }, [])
+
   useEffect(() => {
     const interval = setInterval(() => {
       setPhraseIdx((i) => (i + 1) % rotatingPhrases.length)
@@ -375,7 +381,7 @@ export default function MortgageHoldsPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setBookingOpen(true)}
+              onClick={openBooking}
               className="btn-gradient text-sm px-5 py-2.5"
             >
               Book Your Call
@@ -454,7 +460,7 @@ export default function MortgageHoldsPage() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               type="button"
-              onClick={() => setBookingOpen(true)}
+              onClick={openBooking}
               className="btn-gradient px-10 py-4 text-base"
             >
               Book Your Call to Start
@@ -724,7 +730,7 @@ export default function MortgageHoldsPage() {
           <div className="mt-12 text-center scroll-reveal">
             <button
               type="button"
-              onClick={() => setBookingOpen(true)}
+              onClick={openBooking}
               className="btn-gradient px-10 py-4 text-base"
             >
               Start at Step 1 — Book Your Call
@@ -823,7 +829,7 @@ export default function MortgageHoldsPage() {
           </p>
           <button
             type="button"
-            onClick={() => setBookingOpen(true)}
+            onClick={openBooking}
             className="btn-gradient px-12 py-4 text-lg"
           >
             Book Your Call to Start

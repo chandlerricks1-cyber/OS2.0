@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import FacebookPixel from '@/components/shared/FacebookPixel'
 import './globals.css'
 
 const inter = Inter({
@@ -38,7 +39,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <FacebookPixel />
+        {children}
+      </body>
     </html>
   )
 }
