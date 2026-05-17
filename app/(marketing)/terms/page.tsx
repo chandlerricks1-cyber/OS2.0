@@ -269,9 +269,19 @@ export default function TermsPage() {
       </main>
 
       <footer className="border-t border-zinc-200">
-        <div className="mx-auto max-w-4xl px-6 py-8 text-sm text-zinc-500">
-          &copy; {new Date().getFullYear()} Crucible Coaching LLC. All rights
-          reserved.
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-zinc-500 sm:flex-row">
+          <p>
+            &copy; {new Date().getFullYear()} Crucible Coaching LLC. All rights
+            reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-zinc-900 transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-zinc-900 transition-colors">
+              Terms
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
