@@ -37,6 +37,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/brand-script') ||
     pathname.startsWith('/api/brand-script') ||
     pathname.startsWith('/mortgage-holds') ||
+    pathname === '/POV-Engine' ||
+    pathname === '/POV-Engine.html' ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/api/webhooks/') ||

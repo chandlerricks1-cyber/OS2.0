@@ -6,6 +6,11 @@ const nextConfig = {
     },
   },
   optimizeFonts: false,
+  async rewrites() {
+    return [
+      { source: '/POV-Engine', destination: '/POV-Engine.html' },
+    ];
+  },
 };
 
 export default nextConfig;
