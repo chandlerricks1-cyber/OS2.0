@@ -6,6 +6,7 @@ import { LogOut } from 'lucide-react'
 
 const navLinks = [
   { href: '/admin', label: 'Dashboard', exact: true },
+  { href: '/admin/todos', label: 'To-Dos' },
   { href: '/admin/podcast', label: 'Podcast Leads' },
   { href: '/admin/clients', label: 'Clients' },
   { href: '/admin/contacts', label: 'Contacts' },

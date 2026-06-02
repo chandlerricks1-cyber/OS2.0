@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X, Shield, Mic, Users, Plug, MessageSquare, CalendarDays, KanbanSquare, Contact } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, Flame, Settings, X, Shield, Mic, Users, Plug, MessageSquare, CalendarDays, KanbanSquare, Contact, CheckSquare } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 
@@ -64,6 +64,11 @@ const adminNavItems = [
     label: 'Admin Dashboard',
     icon: <Shield className="w-[18px] h-[18px]" strokeWidth={1.5} />,
     exact: true,
+  },
+  {
+    href: '/dashboard/admin/todos',
+    label: 'My To-Dos',
+    icon: <CheckSquare className="w-[18px] h-[18px]" strokeWidth={1.5} />,
   },
   {
     href: '/dashboard/admin/podcast',
