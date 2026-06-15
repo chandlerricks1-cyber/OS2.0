@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/brand-script') ||
     pathname.startsWith('/api/brand-script') ||
     pathname.startsWith('/mortgage-holds') ||
+    pathname.startsWith('/pov-pro') ||
     pathname === '/POV-Engine' ||
     pathname === '/POV-Engine.html' ||
     pathname.startsWith('/privacy') ||
@@ -87,6 +88,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|mov)$).*)',
   ],
 }
