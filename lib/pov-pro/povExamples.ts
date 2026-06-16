@@ -53,6 +53,8 @@ export interface BeforeAfterClip {
   badge: string
   /** Setup → punchline caption above the clip. */
   hook: { setup: string; punch: string }
+  /** Instagram-style engagement shown on the post. */
+  stats: { views: string; likes: string; leads: string }
   /** The key differences called out as overlays on the clip. */
   points: string[]
 }
@@ -64,8 +66,9 @@ export const BEFORE_AFTER: { before: BeforeAfterClip; after: BeforeAfterClip } =
     badge: 'Before · Scripted brand video',
     hook: {
       setup: 'This is a good video, right?',
-      punch: 'Wrong. It got 761 views, 3 likes, and 0 leads.',
+      punch: 'Wrong.',
     },
+    stats: { views: '761', likes: '3', leads: '0' },
     points: ['Zero engagement', 'No organic growth', 'No lead potential'],
   },
   after: {
@@ -74,8 +77,9 @@ export const BEFORE_AFTER: { before: BeforeAfterClip; after: BeforeAfterClip } =
     badge: 'After · POV content',
     hook: {
       setup: 'Same company. One change — POV.',
-      punch: 'Now the views, the engagement, and the leads pour in.',
+      punch: 'Here’s what happened.',
     },
+    stats: { views: '156K', likes: '6,293', leads: '71' },
     points: ['Authentic engagement platforms love', 'Free brand awareness', 'Views = leads'],
   },
 }
@@ -85,10 +89,15 @@ export const BEFORE_AFTER: { before: BeforeAfterClip; after: BeforeAfterClip } =
  * landing pages lead with different reels. Wraps around the full list.
  */
 export function rotatedExamples(offset: number, count = 3): PovExample[] {
-  const total = POV_EXAMPLES.length
+  // Only feature clips that have engagement chips — that section is social
+  // proof, so a clip with no numbers would look broken. Fall back to the full
+  // list only if there aren't enough with stats.
+  const withStats = POV_EXAMPLES.filter((e) => e.stats)
+  const pool = withStats.length >= count ? withStats : POV_EXAMPLES
+  const total = pool.length
   if (total === 0) return []
   const n = Math.min(count, total)
-  // Step by 2 per page so adjacent avatars don't share the same lead clip.
-  const start = ((offset * 2) % total + total) % total
-  return Array.from({ length: n }, (_, i) => POV_EXAMPLES[(start + i) % total])
+  // Step by 1 per page so adjacent avatars lead with a different clip.
+  const start = ((offset % total) + total) % total
+  return Array.from({ length: n }, (_, i) => pool[(start + i) % total])
 }

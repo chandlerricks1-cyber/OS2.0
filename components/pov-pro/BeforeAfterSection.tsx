@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Volume2, VolumeX, X, Check, ArrowRight } from 'lucide-react'
+import { Volume2, VolumeX, X, Check, ArrowRight, Heart, Play, MapPin } from 'lucide-react'
 import { BEFORE_AFTER, type BeforeAfterClip } from '@/lib/pov-pro/povExamples'
 
 const CLIPS: BeforeAfterClip[] = [BEFORE_AFTER.before, BEFORE_AFTER.after]
@@ -156,9 +156,30 @@ function ClipCard({
           {isUnmuted ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
 
-        {/* Difference overlays */}
+        {/* Instagram-style engagement rail */}
+        <div className="absolute right-2.5 bottom-24 flex flex-col items-center gap-3 pointer-events-none">
+          <IgStat
+            icon={<Heart className={`w-5 h-5 ${before ? 'text-white' : 'text-red-500 fill-red-500'}`} />}
+            value={clip.stats.likes}
+            srLabel="likes"
+          />
+          <IgStat
+            icon={<Play className="w-5 h-5 text-white fill-white" />}
+            value={clip.stats.views}
+            srLabel="views"
+          />
+          <IgStat
+            icon={<MapPin className="w-4 h-4 text-white" />}
+            value={clip.stats.leads}
+            srLabel="local leads"
+            caption="leads"
+            accent
+          />
+        </div>
+
+        {/* Difference overlays (caption) */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pt-10 pb-3 px-3 pointer-events-none">
-          <ul className="space-y-1.5">
+          <ul className="space-y-1.5 max-w-[64%]">
             {clip.points.map((point) => (
               <li key={point} className="flex items-center gap-2">
                 <span
@@ -180,6 +201,47 @@ function ClipCard({
           </ul>
         </div>
       </div>
+    </div>
+  )
+}
+
+/** A single Instagram-style engagement stat: icon + count (+ optional caption). */
+function IgStat({
+  icon,
+  value,
+  srLabel,
+  caption,
+  accent = false,
+}: {
+  icon: React.ReactNode
+  value: string
+  srLabel: string
+  caption?: string
+  accent?: boolean
+}) {
+  return (
+    <div className="flex flex-col items-center gap-0.5" aria-label={`${value} ${srLabel}`}>
+      <span
+        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg ${
+          accent ? 'bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end' : 'bg-black/45 backdrop-blur'
+        }`}
+      >
+        {icon}
+      </span>
+      <span
+        className="text-[12px] font-bold text-white leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+        aria-hidden
+      >
+        {value}
+      </span>
+      {caption ? (
+        <span
+          className="text-[9px] font-semibold uppercase tracking-wide text-white/90 leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+          aria-hidden
+        >
+          {caption}
+        </span>
+      ) : null}
     </div>
   )
 }
