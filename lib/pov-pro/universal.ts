@@ -174,9 +174,8 @@ export const UNIVERSAL: UniversalContent = {
   },
 
   testimonials: {
-    heading: 'What owners are saying',
-    subhead: 'Real results from real home-service businesses.',
-    placeholders: ['{{TESTIMONIAL_1}}', '{{TESTIMONIAL_2}}', '{{TESTIMONIAL_3}}'],
+    heading: 'Real businesses. Real organic results.',
+    subhead: 'Home-service companies running the POV content system — and the views and leads it brings in.',
   },
 
   faqUniversal: [

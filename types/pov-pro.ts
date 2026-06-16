@@ -184,11 +184,10 @@ export interface UniversalContent {
     items: DeliverableItem[]
   }
 
-  // 9. Testimonials — labeled placeholders
+  // 9. Testimonials — heading/subhead; cards live in lib/pov-pro/testimonials.ts
   testimonials: {
     heading: string
     subhead: string
-    placeholders: string[]
   }
 
   // 10. Universal FAQ questions (shown after the avatar master question)
