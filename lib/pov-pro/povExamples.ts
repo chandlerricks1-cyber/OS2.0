@@ -80,7 +80,7 @@ export const BEFORE_AFTER: { before: BeforeAfterClip; after: BeforeAfterClip } =
       punch: 'Here’s what happened.',
     },
     stats: { views: '156K', likes: '6,293', leads: '71' },
-    points: ['Authentic engagement platforms love', 'Free brand awareness', 'Views = leads'],
+    points: ['Authentic Engagement', 'Free brand awareness', 'Views = leads'],
   },
 }
 
