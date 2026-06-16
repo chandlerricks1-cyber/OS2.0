@@ -47,27 +47,6 @@ export const UNIVERSAL: UniversalContent = {
         icon: 'MessageCircle',
       },
     ],
-    pillars: [
-      {
-        kind: 'problem',
-        title: 'The problem',
-        body: 'Show the homeowner the issue the way the pro sees it — inside the wall, under the house, on the roof — explained in plain language.',
-      },
-      {
-        kind: 'fix',
-        title: 'The fix',
-        body: 'Show the work that solves it. Real hands, the real reveal, the actual repair — the part homeowners never get to watch.',
-      },
-      {
-        kind: 'above-and-beyond',
-        title: 'Above & beyond',
-        body: 'The unasked-for extra care. This is the trust differentiator — it plants "this company goes the extra mile for me" in every viewer. Never skip it.',
-      },
-    ],
-    sevenShot: {
-      title: 'The 7-shot field capture system',
-      body: 'The exact shots a tech grabs on every job so our editors can always build a winning video. Your tech learns it in their own training track — and after a few jobs it is as automatic as buckling a seatbelt.',
-    },
     effortNote:
       'Effort for your tech: about one minute per job. The full system stands up in roughly 8 hours total, spread over a few days.',
   },
@@ -91,10 +70,6 @@ export const UNIVERSAL: UniversalContent = {
       {
         heading: 'Compounds with your paid ads',
         body: 'Organic POV content surrounds your ads with proof, so the same ad dollar converts better. Your best organic videos become your best ad creative.',
-      },
-      {
-        heading: 'Inputs over outcomes',
-        body: 'You control the reps, the uploads, and the engagement — views follow. The system is built on daily non-negotiables, not luck.',
       },
     ],
   },
@@ -123,17 +98,12 @@ export const UNIVERSAL: UniversalContent = {
         response:
           'Our guarantee puts the risk on us. We only win when you get finished content for every job you submit.',
       },
-      {
-        objection: 'Outcomes, not vanity metrics',
-        response:
-          'We talk in leads and booked jobs — not impressions and "engagement."',
-      },
     ],
   },
 
   guarantee: {
     heading: 'The guarantee',
-    body: `In your first month, you get at least one finished, ready-to-post video for every job you submit. We expect 15–30 job submissions a month — and we turn every single one into content.`,
+    body: `In your first month, you receive at least one finished, ready-to-post video for every job you submit. Most clients submit between 15 and 30 jobs a month, and every one is produced into content.`,
     reminder: 'A finished video for every job you submit — guaranteed.',
   },
 
@@ -164,11 +134,6 @@ export const UNIVERSAL: UniversalContent = {
       {
         title: 'A weekly cadence system',
         detail: 'The operating rhythm that keeps content shipping without you chasing it.',
-      },
-      {
-        title: 'Repurposing winners into ad creative',
-        detail: 'Your best organic videos turned into proven paid creative.',
-        addOn: true,
       },
     ],
   },

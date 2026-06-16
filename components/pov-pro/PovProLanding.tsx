@@ -7,7 +7,6 @@ import { FloatingNav } from './FloatingNav'
 import { HeroSection } from './HeroSection'
 import { PovExamplesSection } from './PovExamplesSection'
 import { AgitationSection } from './AgitationSection'
-import { ReframeSection } from './ReframeSection'
 import { HowItWorksSection } from './HowItWorksSection'
 import { ProofSection } from './ProofSection'
 import { ObjectionSection } from './ObjectionSection'
@@ -46,13 +45,12 @@ export function PovProLanding({ avatar }: { avatar: AvatarConfig }) {
           <HeroSection avatar={avatar} />
           <PovExamplesSection avatar={avatar} />
           <AgitationSection avatar={avatar} />
-          <ReframeSection avatar={avatar} />
           <HowItWorksSection />
+          <TestimonialsSection />
           <ProofSection avatar={avatar} />
           <ObjectionSection avatar={avatar} />
           <GuaranteeSection />
           <DeliverablesSection />
-          <TestimonialsSection />
           <FaqSection
             avatar={avatar}
             openIndex={openFaq}

@@ -53,10 +53,6 @@ const adSpendPlateau: AvatarConfig = {
       },
     ],
   },
-  reframe: {
-    heading: 'This is the compounding play.',
-    body: 'Organic POV content surrounds your ads with proof — warming the prospect before and after the click (the six-touchpoints effect). That lowers CPL and shortens payback. And your best organic videos become your best ads: proven creative, not guesses. Organic isn\'t instead of ads — it\'s the multiplier on the spend you\'re already making.',
-  },
   proof: {
     heading: 'Why this fixes your ad math',
     seeItems: [
@@ -145,10 +141,6 @@ const agencyBurned: AvatarConfig = {
       },
     ],
   },
-  reframe: {
-    heading: `${PRODUCT_NAME} is the opposite of a black box.`,
-    body: 'Every deliverable is named and visible. The content is the antithesis of agency brand-fluff — real job footage, not glossy ads homeowners scroll past. There\'s a written month-one guarantee that puts the risk on us. And you own the asset: the library and the audience are yours, not ours.',
-  },
   proof: {
     heading: 'What an agency gives you vs. what you get',
     seeItems: [
@@ -236,10 +228,6 @@ const fireTheVideographer: AvatarConfig = {
         icon: 'EyeOff',
       },
     ],
-  },
-  reframe: {
-    heading: 'The problem isn\'t effort. It\'s polish.',
-    body: `${PRODUCT_NAME} replaces expensive, slow, scripted production with real footage your techs already capture — and the editing is done for you, so there\'s no production bottleneck. Same daily cadence, a fraction of the cost, and it actually converts. Stop paying for pretty. Start getting booked.`,
   },
   proof: {
     heading: 'Why polished loses to real',

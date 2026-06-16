@@ -1,18 +1,15 @@
 import { UNIVERSAL } from '@/lib/pov-pro/universal'
 import { getIcon } from './iconRegistry'
 
-const PILLAR_NUM: Record<string, string> = {
-  problem: '1',
-  fix: '2',
-  'above-and-beyond': '3',
-}
-
 export function HowItWorksSection() {
   const { howItWorks } = UNIVERSAL
   return (
     <section id="how-it-works" className="bg-gray-50 py-20 md:py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16 scroll-reveal">
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-gradient-end mb-3">
+            You capture · we run the machine
+          </div>
           <h2 className="text-3xl md:text-4xl font-black text-page-dark tracking-tight mb-4">
             {howItWorks.heading}
           </h2>
@@ -21,66 +18,54 @@ export function HowItWorksSection() {
           </p>
         </div>
 
-        {/* The daily loop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-16">
-          {howItWorks.mechanism.map((step, i) => {
-            const Icon = getIcon(step.icon)
-            const isOurs = step.title === 'We edit' || step.title === 'We post'
-            return (
-              <div
-                key={step.step}
-                className="scroll-reveal bg-white rounded-[20px] p-6 shadow-card-soft border border-gray-100 relative"
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
-                {isOurs && (
-                  <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wide text-brand-gradient-end bg-brand-gradient-end/10 px-2 py-0.5 rounded-full">
-                    On us
-                  </span>
-                )}
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5 text-white" />
+        {/* Connected step flow */}
+        <div className="relative">
+          {/* connector line behind the icon row (desktop) */}
+          <div
+            className="hidden lg:block absolute top-9 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end opacity-30"
+            aria-hidden
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-y-10 gap-x-6 relative">
+            {howItWorks.mechanism.map((step, i) => {
+              const Icon = getIcon(step.icon)
+              const isOurs = step.title === 'We edit' || step.title === 'We post'
+              return (
+                <div
+                  key={step.step}
+                  className="scroll-reveal flex flex-col items-center text-center px-1"
+                  style={{ transitionDelay: `${i * 80}ms` }}
+                >
+                  <div className="relative mb-5">
+                    <div className="w-[72px] h-[72px] rounded-2xl bg-white ring-4 ring-gray-50 shadow-card-soft flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-gradient-start to-brand-gradient-end flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-page-dark text-white text-[11px] font-bold flex items-center justify-center shadow">
+                      {step.step.replace(/^0/, '')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <h3 className="text-base font-bold text-page-dark">{step.title}</h3>
+                    {isOurs && (
+                      <span className="text-[9px] font-bold uppercase tracking-wide text-brand-gradient-end bg-brand-gradient-end/10 px-1.5 py-0.5 rounded-full">
+                        On us
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-page-muted leading-relaxed">{step.description}</p>
                 </div>
-                <div className="text-xs font-bold text-page-muted mb-1">{step.step}</div>
-                <h3 className="text-base font-bold text-page-dark mb-2">{step.title}</h3>
-                <p className="text-sm text-page-muted leading-relaxed">{step.description}</p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
-        {/* The 3 pillars */}
-        <div className="text-center mb-10 scroll-reveal">
-          <h3 className="text-2xl md:text-3xl font-black text-page-dark tracking-tight">
-            Every video, 3 pillars
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-          {howItWorks.pillars.map((pillar, i) => (
-            <div
-              key={pillar.kind}
-              className="scroll-reveal bg-white rounded-[25px] p-8 shadow-card-soft border border-gray-100"
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-brand-gradient-start to-brand-gradient-end leading-none mb-4">
-                {PILLAR_NUM[pillar.kind]}
-              </div>
-              <h4 className="text-lg font-bold text-page-dark mb-3">{pillar.title}</h4>
-              <p className="text-page-muted text-base leading-relaxed">{pillar.body}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* 7-shot + effort */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="scroll-reveal bg-page-dark rounded-[25px] p-8 text-white">
-            <h4 className="text-lg font-bold mb-3">{howItWorks.sevenShot.title}</h4>
-            <p className="text-gray-300 text-base leading-relaxed">{howItWorks.sevenShot.body}</p>
-          </div>
-          <div className="scroll-reveal bg-gradient-to-br from-brand-gradient-start/10 to-brand-gradient-end/10 border border-brand-gradient-end/20 rounded-[25px] p-8 flex items-center">
-            <p className="text-lg font-semibold text-page-dark leading-relaxed">
-              {howItWorks.effortNote}
-            </p>
-          </div>
+        {/* Effort note */}
+        <div className="scroll-reveal mt-14 max-w-3xl mx-auto bg-gradient-to-br from-brand-gradient-start/10 to-brand-gradient-end/10 border border-brand-gradient-end/20 rounded-[25px] px-7 py-6 text-center">
+          <p className="text-base md:text-lg font-semibold text-page-dark leading-relaxed">
+            {howItWorks.effortNote}
+          </p>
         </div>
       </div>
     </section>

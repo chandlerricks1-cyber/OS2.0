@@ -72,12 +72,6 @@ export interface AvatarConfig {
     blocks: AgitationBlock[]
   }
 
-  // 3. Reframe bridge
-  reframe: {
-    heading: string
-    body: string
-  }
-
   // 5. Proof — avatar-specific SEE items (blended with universal proof)
   proof: {
     heading?: string
@@ -113,12 +107,6 @@ export interface MechanismStep {
   icon?: IconName
 }
 
-export interface Pillar {
-  kind: 'problem' | 'fix' | 'above-and-beyond'
-  title: string
-  body: string
-}
-
 export interface ProofPoint {
   heading: string
   body: string
@@ -147,11 +135,6 @@ export interface UniversalContent {
     heading: string
     subhead: string
     mechanism: MechanismStep[]
-    pillars: Pillar[]
-    sevenShot: {
-      title: string
-      body: string
-    }
     effortNote: string
   }
 
