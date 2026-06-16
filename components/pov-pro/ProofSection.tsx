@@ -1,7 +1,7 @@
-import { Play } from 'lucide-react'
 import type { AvatarConfig } from '@/types/pov-pro'
 import { UNIVERSAL } from '@/lib/pov-pro/universal'
 import { getIcon } from './iconRegistry'
+import { BeforeAfterSection } from './BeforeAfterSection'
 
 export function ProofSection({ avatar }: { avatar: AvatarConfig }) {
   const { proof } = UNIVERSAL
@@ -37,20 +37,8 @@ export function ProofSection({ avatar }: { avatar: AvatarConfig }) {
           })}
         </div>
 
-        {/* Example reels — labeled placeholders until real embeds land */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
-          {proof.reelPlaceholders.map((reel) => (
-            <div
-              key={reel}
-              className="scroll-reveal aspect-[9/16] rounded-[25px] bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-200 flex flex-col items-center justify-center gap-3 text-page-muted"
-            >
-              <div className="w-14 h-14 rounded-full bg-white shadow-card-soft flex items-center justify-center">
-                <Play className="w-6 h-6 text-brand-gradient-end fill-brand-gradient-end" />
-              </div>
-              <span className="text-sm font-mono">{reel}</span>
-            </div>
-          ))}
-        </div>
+        {/* Before/after — same company, scripted brand video vs POV content */}
+        <BeforeAfterSection />
 
         {/* Universal proof points */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

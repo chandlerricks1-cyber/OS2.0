@@ -97,7 +97,6 @@ export const UNIVERSAL: UniversalContent = {
         body: 'You control the reps, the uploads, and the engagement — views follow. The system is built on daily non-negotiables, not luck.',
       },
     ],
-    reelPlaceholders: ['{{REEL_1}}', '{{REEL_2}}', '{{REEL_3}}'],
   },
 
   objectionDefusers: {

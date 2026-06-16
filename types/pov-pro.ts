@@ -160,8 +160,6 @@ export interface UniversalContent {
     heading: string
     subhead: string
     points: ProofPoint[]
-    /** Embedded example reels — labeled placeholders until real embeds exist. */
-    reelPlaceholders: string[]
   }
 
   // 6. Universal agency-skepticism defusers

@@ -43,6 +43,43 @@ export const POV_EXAMPLES: PovExample[] = [
   // { src: '/pov-examples/<sixth>.mp4', label: '<category>', stats: { ... } },
 ]
 
+// Before/after comparison — same company, scripted brand video vs POV content.
+// Shown in the proof section (replaces the old reel placeholders). These play
+// with sound so visitors can feel the difference.
+export interface BeforeAfterClip {
+  src: string
+  kind: 'before' | 'after'
+  /** Header label, e.g. "Before · Scripted brand video". */
+  badge: string
+  /** Setup → punchline caption above the clip. */
+  hook: { setup: string; punch: string }
+  /** The key differences called out as overlays on the clip. */
+  points: string[]
+}
+
+export const BEFORE_AFTER: { before: BeforeAfterClip; after: BeforeAfterClip } = {
+  before: {
+    src: '/pov-examples/before-scripted.mp4',
+    kind: 'before',
+    badge: 'Before · Scripted brand video',
+    hook: {
+      setup: 'This is a good video, right?',
+      punch: 'Wrong. It got 761 views, 3 likes, and 0 leads.',
+    },
+    points: ['Zero engagement', 'No organic growth', 'No lead potential'],
+  },
+  after: {
+    src: '/pov-examples/after-pov.mp4',
+    kind: 'after',
+    badge: 'After · POV content',
+    hook: {
+      setup: 'Same company. One change — POV.',
+      punch: 'Now the views, the engagement, and the leads pour in.',
+    },
+    points: ['Authentic engagement platforms love', 'Free brand awareness', 'Views = leads'],
+  },
+}
+
 /**
  * Returns `count` examples for a given page, rotated by `offset` so different
  * landing pages lead with different reels. Wraps around the full list.
