@@ -9,6 +9,13 @@ export type AvatarSlug =
   | 'ad-spend-plateau'
   | 'agency-burned'
   | 'fire-the-videographer'
+  | 'invisible-owner'
+  | 'camera-shy'
+  | 'time-starved'
+  | 'crowded-market'
+  | 'systems-scaler'
+  | 'tried-and-quit'
+  | 'equity-minded'
 
 /** Icon names are strings in data; mapped to lucide components in iconRegistry. */
 export type IconName = string
