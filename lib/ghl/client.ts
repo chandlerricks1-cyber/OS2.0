@@ -15,6 +15,20 @@ export const PODCAST_STAGE_NAMES = [
 
 export type PodcastStageName = (typeof PODCAST_STAGE_NAMES)[number]
 
+export const POV_PRO_PIPELINE_NAME = 'POV Pro Funnel'
+export const POV_PRO_STAGE_NAMES = [
+  'New Lead',
+  'Intake Submitted',
+  'Discovery Booked',
+  'Discovery Completed',
+  'Closed/Won',
+  'Lost',
+  'Not Qualified',
+  'Not Interested',
+] as const
+
+export type PovProStageName = (typeof POV_PRO_STAGE_NAMES)[number]
+
 export interface GhlStage {
   id: string
   name: string
@@ -83,11 +97,19 @@ export async function listPipelines(): Promise<GhlPipeline[]> {
 }
 
 export async function createPodcastPipeline(): Promise<GhlPipeline> {
+  return createPipelineFromStages(PODCAST_PIPELINE_NAME, PODCAST_STAGE_NAMES)
+}
+
+export async function createPovProPipeline(): Promise<GhlPipeline> {
+  return createPipelineFromStages(POV_PRO_PIPELINE_NAME, POV_PRO_STAGE_NAMES)
+}
+
+async function createPipelineFromStages(name: string, stages: readonly string[]): Promise<GhlPipeline> {
   const { locationId } = getConfig()
   const body = {
-    name: PODCAST_PIPELINE_NAME,
+    name,
     locationId,
-    stages: PODCAST_STAGE_NAMES.map((name, i) => ({ name, position: i })),
+    stages: stages.map((stageName, i) => ({ name: stageName, position: i })),
   }
   const data = await ghlFetch<{ pipeline?: GhlPipeline } & GhlPipeline>(`/opportunities/pipelines`, {
     method: 'POST',
@@ -96,26 +118,35 @@ export async function createPodcastPipeline(): Promise<GhlPipeline> {
   return (data.pipeline ?? data) as GhlPipeline
 }
 
-let pipelineCache: { pipeline: GhlPipeline; at: number } | null = null
 const CACHE_TTL_MS = 5 * 60 * 1000
+const pipelineCacheByName = new Map<string, { pipeline: GhlPipeline; at: number }>()
 
-export async function getPodcastPipeline(forceRefresh = false): Promise<GhlPipeline> {
+async function getPipelineByName(pipelineName: string, forceRefresh = false): Promise<GhlPipeline> {
   const now = Date.now()
-  if (!forceRefresh && pipelineCache && now - pipelineCache.at < CACHE_TTL_MS) {
-    return pipelineCache.pipeline
+  const cached = pipelineCacheByName.get(pipelineName)
+  if (!forceRefresh && cached && now - cached.at < CACHE_TTL_MS) {
+    return cached.pipeline
   }
   const pipelines = await listPipelines()
-  const match = pipelines.find((p) => p.name.trim().toLowerCase() === PODCAST_PIPELINE_NAME.toLowerCase())
+  const match = pipelines.find((p) => p.name.trim().toLowerCase() === pipelineName.toLowerCase())
   if (!match) {
     throw new Error(
-      `GHL pipeline "${PODCAST_PIPELINE_NAME}" not found. Hit POST /api/admin/ghl/setup to create it, or create it manually in GHL.`
+      `GHL pipeline "${pipelineName}" not found. Hit POST /api/admin/ghl/setup to create it, or create it manually in GHL.`
     )
   }
-  pipelineCache = { pipeline: match, at: now }
+  pipelineCacheByName.set(pipelineName, { pipeline: match, at: now })
   return match
 }
 
-export function findStageId(pipeline: GhlPipeline, stageName: PodcastStageName): string {
+export function getPodcastPipeline(forceRefresh = false): Promise<GhlPipeline> {
+  return getPipelineByName(PODCAST_PIPELINE_NAME, forceRefresh)
+}
+
+export function getPovProPipeline(forceRefresh = false): Promise<GhlPipeline> {
+  return getPipelineByName(POV_PRO_PIPELINE_NAME, forceRefresh)
+}
+
+export function findStageId(pipeline: GhlPipeline, stageName: string): string {
   const stage = pipeline.stages.find((s) => s.name.trim().toLowerCase() === stageName.toLowerCase())
   if (!stage) {
     throw new Error(`Stage "${stageName}" not found in GHL pipeline "${pipeline.name}"`)
